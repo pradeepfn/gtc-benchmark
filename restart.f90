@@ -29,8 +29,8 @@ subroutine restart_write
   integer i,j,mquantity,mflx,n_mode,mstepfinal,noutputs
   integer save_restart_files,ierr
 
-  !save_restart_files=1
-  save_restart_files=0
+  save_restart_files=1
+  !save_restart_files=0
 
 !!!!!!!!!!!!!!!******************
 !!  if(mype < 10)then
@@ -57,7 +57,7 @@ subroutine restart_write
 
   if(save_restart_files==1)then
      write(restart_dir,'("STEP_",i0)')(mstepall+istep)
-!     if(mype==0)call system("mkdir "//restart_dir)
+     if(mype==0)call system("mkdir "//restart_dir)
      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
      file_name=trim(restart_dir)//'/'//trim(cdum)
      open(222,file=file_name,status='replace',form='unformatted')
@@ -159,6 +159,7 @@ subroutine restart_read
   open(333,file=cdum,status='old',form='unformatted')
 
 ! read particle information to restart previous run
+  print *, "reading checkpointed data..."
   read(333)mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale
   if(mype==0)read(333)etracer,ptracer
   read(333)zion(1:nparam,1:mi),zion0(6,1:mi)
