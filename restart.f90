@@ -29,8 +29,8 @@ subroutine restart_write
   integer i,j,mquantity,mflx,n_mode,mstepfinal,noutputs
   integer save_restart_files,ierr
 
-  save_restart_files=1
-  !save_restart_files=0
+  !save_restart_files=1
+  save_restart_files=0
 
 !!!!!!!!!!!!!!!******************
 !!  if(mype < 10)then
