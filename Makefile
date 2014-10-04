@@ -152,9 +152,9 @@ ifeq ($(os),Linux)
     ##OPT:=-O --ap --tpp --ntrace --staticlink -I/usr/local/lff95/include
   ##  OPT:=-O --ap --pca --trace
  # YX add the following netcdf lib
-    NETCDF := -lnetcdf
-    LIB := -I/usr/pgi/linux86-64/6.1/include -L/usr/lib/netcdf-3.6.1/lib \
-               -I/usr/lib/netcdf-3.6.1/include $(NETCDF)
+    NETCDF := -lnetcdf -lnetcdff
+    LIB := -I/usr/pgi/linux86-64/6.1/include -L/usr/lib \
+               -I/usr/include $(NETCDF)
   ifeq ($(PGI),y)
     MPIMODULE:=/usr/pppl/pgi/5.2-1/mpich-1.2.6/include/f90base
     F90C:=pgf90
