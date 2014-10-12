@@ -66,11 +66,14 @@ subroutine restart_write
   endif
 
 ! record particle information for future restart run
-
-  write(222)mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale
+  call nvchkpt_all(mype);
+  write(222)mi,me,ntracer
   if(mype==0)write(222)etracer,ptracer
-  write(222)zion(1:nparam,1:mi),zion0(6,1:mi)
-  if(nhybrid>0)write(222)phisave,zelectron(1:6,1:me),zelectron0(6,1:me)
+
+  !write(222)mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale
+  !if(mype==0)write(222)etracer,ptracer
+  !write(222)zion(1:nparam,1:mi),zion0(6,1:mi)
+  !if(nhybrid>0)write(222)phisave,zelectron(1:6,1:me),zelectron0(6,1:me)
   close(222)
 
 ! S.Ethier 01/30/04 Save a copy of history.out and sheareb.out for restart
@@ -160,11 +163,14 @@ subroutine restart_read
 
 ! read particle information to restart previous run
   print *, "reading checkpointed data..."
-  read(333)mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale
+  read(333)mi,me,ntracer
   if(mype==0)read(333)etracer,ptracer
-  read(333)zion(1:nparam,1:mi),zion0(6,1:mi)
-  if(nhybrid>0)read(333)phisave,zelectron(1:6,1:me),zelectron0(6,1:me)
   close(333)
+  !read(333)mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale
+  !if(mype==0)read(333)etracer,ptracer
+  !read(333)zion(1:nparam,1:mi),zion0(6,1:mi)
+  !if(nhybrid>0)read(333)phisave,zelectron(1:6,1:me),zelectron0(6,1:me)
+  !close(333)
 
   return
 
