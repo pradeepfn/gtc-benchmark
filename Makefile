@@ -153,7 +153,7 @@ ifeq ($(os),Linux)
   ##  OPT:=-O --ap --pca --trace
  # YX add the following netcdf lib
     NETCDF := -lnetcdf -lnetcdff
-    LIB := -I/usr/pgi/linux86-64/6.1/include -L/usr/lib \
+    LIB := -cpp -O -L/usr/lib \
                -I/usr/include $(NETCDF)
   ifeq ($(PGI),y)
     MPIMODULE:=/usr/pppl/pgi/5.2-1/mpich-1.2.6/include/f90base
@@ -251,17 +251,23 @@ endif
 .SUFFIXES: .o .f90 .F90
 
 # List of all the object files needed to build the code
-OBJ:=module.o main.o function.o $(SETUP) ran_num_gen.o set_random_values.o \
+OBJ:=allocate.o module.o main.o function.o $(SETUP) ran_num_gen.o set_random_values.o \
     load.o restart.o diagnosis.o snapshot.o $(CHARGEI) $(POISSON) smooth.o \
     field.o $(PUSHI) $(SHIFTI) $(FFT) tracking.o \
-    dataout3d.o 
+    dataout3d.o c_io.o 
 ## mem_check.o \
 ##    output3d_serial.o output.o
 
 # selectmode.o volume.o 
 
+CC=mpicc
+
 $(CMD): $(OBJ)
 	$(CMP) $(OMPOPT) $(OPT) -o $(CMD) $(OBJ) $(LIB) 
+
+#newly added c source files
+c_io.o: c_io.c c_io.h mycheckpoint.h
+	$(CC) -c  c_io.c
 
 module.o : module.F90
 	$(CMP) $(OMPOPT) $(OPT) -c module.F90

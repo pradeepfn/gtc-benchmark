@@ -15,6 +15,8 @@
 ! You should have received a copy of the GNU General Public License
 ! along with GTC version 1.  If not, see <http://www.gnu.org/licenses/>.
 
+
+!zonali, zonale, phip00, pfuxpsi, rdteme, rdtemi, phi, zion, zion0, zelectron, zelectron0, phisave
 module precision
   use mpi
   integer, parameter :: doubleprec=selected_real_kind(12),&
@@ -58,7 +60,13 @@ module particle_array
   real(wp),dimension(:),allocatable :: wzion,wzelectron,wpelectron,&
        wtelectron0,wtelectron1
   real(wp),dimension(:,:),allocatable :: wpion,wtion0,wtion1
-  real(wp),dimension(:,:),allocatable :: zion,zion0,zelectron,zelectron0,zelectron1
+  !real(wp),dimension(:,:),allocatable :: zion,zion0,zelectron,zelectron0,zelectron1
+  !NVRAM
+  real(wp),dimension(:,:),allocatable :: zelectron1
+  real, pointer :: zion(:,:)
+  real, pointer :: zion0(:,:)
+  real, pointer :: zelectron(:,:)
+  real, pointer :: zelectron0(:,:)
 end module particle_array
 
 module particle_tracking
@@ -73,13 +81,26 @@ module field_array
   integer,parameter :: mmpsi=192
   integer,dimension(:),allocatable :: itran,igrid
   integer,dimension(:,:,:),allocatable :: jtp1,jtp2
-  real(wp),dimension(:),allocatable :: phi00,phip00,rtemi,rteme,rden,qtinv,&
-       pmarki,pmarke,zonali,zonale,gradt
-  real(wp),dimension(:,:),allocatable :: phi,densityi,densitye,markeri,&
-       markere,pgyro,tgyro,dtemper,heatflux,phit
-  real(wp),dimension(:,:,:),allocatable :: evector,wtp1,wtp2,phisave
-  real(wp) :: Total_field_energy(3)
+  !real(wp),dimension(:),allocatable :: phi00,phip00,rtemi,rteme,rden,qtinv,&
+  !     pmarki,pmarke,zonali,zonale,gradt
+  !real(wp),dimension(:,:),allocatable :: phi,densityi,densitye,markeri,&
+  !     markere,pgyro,tgyro,dtemper,heatflux,phit
 
+  real(wp),dimension(:),allocatable :: phi00,rtemi,rteme,rden,qtinv,&
+       pmarki,pmarke,gradt
+  real(wp),dimension(:,:),allocatable :: densityi,densitye,markeri,&
+       markere,pgyro,tgyro,dtemper,heatflux,phit
+  real, pointer :: phip00(:)
+  real, pointer :: zonali(:)
+  real, pointer :: zonale(:)
+  real, pointer :: phi(:,:)
+
+  !real(wp),dimension(:,:,:),allocatable :: evector,wtp1,wtp2,phisave
+  real(wp),dimension(:,:,:),allocatable :: evector,wtp1,wtp2
+  real, pointer :: phisave(:,:,:)
+
+  real(wp) :: Total_field_energy(3)
+  
 #ifdef _SX
 ! SX-6 trick to minimize bank conflicts in chargei
 !cdir duplicate(iigrid,1024)
@@ -97,7 +118,9 @@ module diagnosis_array
   real(wp) efluxi,efluxe,pfluxi,pfluxe,ddeni,ddene,dflowi,dflowe,&
        entropyi,entropye,efield,eradial,particles_energy(2),eflux(mflux),&
        rmarker(mflux),amp_mode(2,num_mode,2)
-  real(wp),dimension(:),allocatable :: hfluxpsi,hfluxpse,rdtemi,pfluxpsi,rdteme
+  !real(wp),dimension(:),allocatable :: hfluxpsi,hfluxpse,rdtemi,pfluxpsi,rdteme
+  real(wp),dimension(:),allocatable :: hfluxpsi,hfluxpse
+  real, pointer :: pfluxpsi(:), rdteme(:),rdtemi(:)
   real(wp),dimension(:,:,:),allocatable :: eigenmode
   real(wp) etracer,ptracer(4)
 end module diagnosis_array

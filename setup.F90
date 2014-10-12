@@ -40,6 +40,7 @@ end module particle_decomp
   use field_array
   use diagnosis_array
   use particle_tracking
+  use Allocator
   implicit none
 
   integer i,j,k,ierror,ij,mid_theta,ip,jt,indp,indt,mtest,micell,mecell
@@ -49,6 +50,10 @@ end module particle_decomp
   CHARACTER(LEN=10) date, time
   namelist /run_parameters/ numberpe,mi,mgrid,mid_theta,mtdiag,delr,delt,&
        ulength,utime,gyroradius
+  
+  !new variables
+  CHARACTER(LEN=10) varname
+  integer cmtsize
 
 #ifdef __AIX
 #define FLUSH flush_
@@ -95,14 +100,35 @@ end module particle_decomp
      tauii=2.09e7_wp*(temperature)**1.5_wp/(edensity0*tauii*2.31_wp)*sqrt(2.0_wp)/utime
      tauii=0.532_wp*tauii
   endif
+!zonali, zonale, phip00, pfuxpsi, rdteme, rdtemi, phi, zion, zion0, zelectron, zelectron0, phisave
+  varname = "zonali"
+  cmtsize = mpsi
+  call alloc_1d_real(zonali,mpsi,varname, mype, cmtsize)
+  varname = "zonale"
+  call alloc_1d_real(zonale,mpsi,varname, mype, cmtsize)
+  varname = "phip00"
+  call alloc_1d_real(phip00,mpsi,varname, mype, cmtsize)
+  varname = "pfluxpsi"
+  call alloc_1d_real(pfluxpsi,mpsi,varname, mype, cmtsize)
+  varname = "rdteme"
+  call alloc_1d_real(rdteme,mpsi,varname, mype, cmtsize)
+  varname = "rdtemi"
+  call alloc_1d_real(rdtemi,mpsi,varname, mype, cmtsize)
+
+  allocate (qtinv(0:mpsi),itran(0:mpsi),mtheta(0:mpsi),&
+     deltat(0:mpsi),rtemi(0:mpsi),rteme(0:mpsi),&
+     rden(0:mpsi),igrid(0:mpsi),pmarki(0:mpsi),&
+     pmarke(0:mpsi),phi00(0:mpsi),&
+     hfluxpsi(0:mpsi),hfluxpse(0:mpsi),gradt(mpsi),&
+     eigenmode(m_poloidal,num_mode,mpsi),STAT=mtest)
 
 ! allocate memory
-  allocate (qtinv(0:mpsi),itran(0:mpsi),mtheta(0:mpsi),&
-     deltat(0:mpsi),rtemi(0:mpsi),rteme(0:mpsi),pfluxpsi(0:mpsi),rdtemi(0:mpsi),&
-     rden(0:mpsi),igrid(0:mpsi),pmarki(0:mpsi),rdteme(0:mpsi),&
-     pmarke(0:mpsi),phi00(0:mpsi),phip00(0:mpsi),&
-     hfluxpsi(0:mpsi),hfluxpse(0:mpsi),zonali(0:mpsi),zonale(0:mpsi),gradt(mpsi),&
-     eigenmode(m_poloidal,num_mode,mpsi),STAT=mtest)
+!  allocate (qtinv(0:mpsi),itran(0:mpsi),mtheta(0:mpsi),&
+!     deltat(0:mpsi),rtemi(0:mpsi),rteme(0:mpsi),pfluxpsi(0:mpsi),rdtemi(0:mpsi),&
+!     rden(0:mpsi),igrid(0:mpsi),pmarki(0:mpsi),rdteme(0:mpsi),&
+!     pmarke(0:mpsi),phi00(0:mpsi),phip00(0:mpsi),&
+!     hfluxpsi(0:mpsi),hfluxpse(0:mpsi),zonali(0:mpsi),zonale(0:mpsi),gradt(mpsi),&
+!     eigenmode(m_poloidal,num_mode,mpsi),STAT=mtest)
   if (mtest /= 0) then
      write(0,*)mype,'*** Cannot allocate qtinv: mtest=',mtest
      call MPI_ABORT(MPI_COMM_WORLD,1,ierror)
@@ -164,12 +190,21 @@ end module particle_decomp
 	if(stdout /= 6 .and. stdout /= 0)close(stdout)
   end if	
 
-! allocate memory
+  varname = "phi"
+  cmtsize = mzeta * mgrid
+  call alloc_2d_real(phi,mzeta,mgrid,varname, mype, cmtsize)
+
   allocate(pgyro(4,mgrid),tgyro(4,mgrid),markeri(mzeta,mgrid),&
-     densityi(0:mzeta,mgrid),phi(0:mzeta,mgrid),evector(3,0:mzeta,mgrid),&
+     densityi(0:mzeta,mgrid),evector(3,0:mzeta,mgrid),&
      jtp1(2,mgrid,mzeta),jtp2(2,mgrid,mzeta),wtp1(2,mgrid,mzeta),&
      wtp2(2,mgrid,mzeta),dtemper(mgrid,mzeta),heatflux(mgrid,mzeta),&
      STAT=mtest)
+! allocate memory
+!  allocate(pgyro(4,mgrid),tgyro(4,mgrid),markeri(mzeta,mgrid),&
+!     densityi(0:mzeta,mgrid),phi(0:mzeta,mgrid),evector(3,0:mzeta,mgrid),&
+!     jtp1(2,mgrid,mzeta),jtp2(2,mgrid,mzeta),wtp1(2,mgrid,mzeta),&
+!     wtp2(2,mgrid,mzeta),dtemper(mgrid,mzeta),heatflux(mgrid,mzeta),&
+!     STAT=mtest)
   if (mtest /= 0) then
      write(0,*)mype,'*** setup: Cannot allocate pgyro: mtest=',mtest
      call MPI_ABORT(MPI_COMM_WORLD,1,ierror)
@@ -234,20 +269,51 @@ end module particle_decomp
      nparam=6
   endif
 
-! allocate memory
-  allocate(zion(nparam,mimax),zion0(nparam,mimax),jtion0(4,mimax),&
+   varname = "zion"
+   cmtsize = (nparam -1) * (mi-1)
+   call alloc_2d_real(zion,nparam,mimax,varname, mype, cmtsize)
+   varname = "zion0"
+   cmtsize = (mi-1) 
+   call alloc_2d_real(zion0,nparam,mimax,varname, mype, cmtsize)
+
+allocate(jtion0(4,mimax),&
      jtion1(4,mimax),kzion(mimax),wzion(mimax),wpion(4,mimax),&
      wtion0(4,mimax),wtion1(4,mimax),STAT=mtest)
+
+
+! allocate memory
+!  allocate(zion(nparam,mimax),zion0(nparam,mimax),jtion0(4,mimax),&
+!     jtion1(4,mimax),kzion(mimax),wzion(mimax),wpion(4,mimax),&
+!     wtion0(4,mimax),wtion1(4,mimax),STAT=mtest)
   if (mtest /= 0) then
      write(0,*)mype,'*** Cannot allocate zion: mtest=',mtest
      call MPI_ABORT(MPI_COMM_WORLD,1,ierror)
   endif
   if(nhybrid>0)then
-     allocate(zelectron(6,memax),zelectron0(6,memax),jtelectron0(memax),&
+     cmtsize = 6 * me
+     varname = "zelectron"
+     call alloc_2d_real(zelectron,6,memax,varname, mype, cmtsize)
+
+     cmtsize = me
+     varname = "zelectron0"
+     call alloc_2d_real(zelectron0,6,memax,varname, mype, cmtsize)
+ 
+     varname = "phisave"
+     cmtsize = mzeta * mgrid * 2*nhybrid
+     call alloc_3d_real(phisave,mzeta,mgrid,2*nhybrid,varname,mype,cmtsize)
+     
+     allocate(jtelectron0(memax),&
         jtelectron1(memax),kzelectron(memax),wzelectron(memax),&
         wpelectron(memax),wtelectron0(memax),wtelectron1(memax),&
         markere(mzeta,mgrid),densitye(0:mzeta,mgrid),zelectron1(6,memax),&
-        phisave(0:mzeta,mgrid,2*nhybrid),phit(0:mzeta,mgrid),STAT=mtest)
+        phit(0:mzeta,mgrid),STAT=mtest)
+    
+
+!     allocate(zelectron(6,memax),zelectron0(6,memax),jtelectron0(memax),&
+!        jtelectron1(memax),kzelectron(memax),wzelectron(memax),&
+!        wpelectron(memax),wtelectron0(memax),wtelectron1(memax),&
+!        markere(mzeta,mgrid),densitye(0:mzeta,mgrid),zelectron1(6,memax),&
+!        phisave(0:mzeta,mgrid,2*nhybrid),phit(0:mzeta,mgrid),STAT=mtest)
      if(mtest /= 0) then
         write(0,*)mype,'*** Cannot allocate zelectron: mtest=',mtest
         call MPI_ABORT(MPI_COMM_WORLD,1,ierror)
