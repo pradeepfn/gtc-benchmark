@@ -52,7 +52,7 @@
 64BITS=y
 XT3=y
 
-#DFLAG=-DDEBUG
+#DFLAG= -g -DDEBUG
 
 # Default names of some platform-dependent files
 SETUP:=setup.o

@@ -66,7 +66,15 @@ end module particle_decomp
 
 ! numerical constant
   pi=4.0_wp*atan(1.0_wp)
-  mstep=max(2,mstep)
+!if its first run, read the mstep from input file
+!if its a restart run, calculate the remaining mstep value.
+  if(irun == 0)then
+    mstep=max(2,mstep)
+  else
+    call resume_step
+    mstep=max(2,mstep-restart_step)
+  endif
+  print *, "mstep : ", mstep
   msnap=min(msnap,mstep/ndiag)
   isnap=mstep/msnap
   idiag1=mpsi/2

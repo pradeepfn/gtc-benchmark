@@ -67,9 +67,10 @@ subroutine restart_write
 
 ! record particle information for future restart run
   call nvchkpt_all(mype);
-  write(222)mi,me,ntracer
+  write(222)mi,me,ntracer,istep+mstepall
   if(mype==0)write(222)etracer,ptracer
 #ifdef DEBUG
+  print *, "mi, me , ntracer, etracer, ptracer ", mi, me, ntracer,istep, etracer, ptracer
   print *, "checkpointed zonali value : ", zonali
   print *, "checkpointed zonale value : ", zonale
   print *, "checkpointed phip00 value : ", phip00
@@ -169,9 +170,10 @@ subroutine restart_read
 
 ! read particle information to restart previous run
   print *, "reading checkpointed data..."
-  read(333)mi,me,ntracer
+  read(333)mi,me,ntracer,restart_step
   if(mype==0)read(333)etracer,ptracer
 #ifdef DEBUG
+  print *, "restart values mi,me,ntracer,restart_step,etracer,ptracer : ",mi,me,ntracer,restart_step,etracer,ptracer
   print *, "zonali value in fortran restart procedure : ",zonali
   print *, "zonale value in fortran restart procedure : ",zonale
   print *, "phip00 value in fortran restart proceduere : ",phip00
@@ -203,3 +205,32 @@ subroutine restart_read
 
 end subroutine restart_read
 
+subroutine resume_step
+  use global_parameters
+  use particle_array
+  use field_array
+  use diagnosis_array
+  implicit none
+
+  integer i,j
+  character(len=18) fname
+
+  if(mype < 10)then
+     write(fname,'("DATA_RESTART.0000",i1)')mype
+  elseif(mype < 100)then
+     write(fname,'("DATA_RESTART.000",i2)')mype
+  elseif(mype < 1000)then
+     write(fname,'("DATA_RESTART.00",i3)')mype
+  elseif(mype < 10000)then
+     write(fname,'("DATA_RESTART.0",i4)')mype
+  else
+     write(fname,'("DATA_RESTART.",i5)')mype
+  endif
+
+  open(333,file=fname,status='old',form='unformatted')
+  print *, "reading restart step value..."
+  ! reading the last step 
+    read(333)mi,me,ntracer,restart_step
+  close(333)
+  print *, "restart_step : ", restart_step
+end subroutine
