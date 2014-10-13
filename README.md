@@ -18,3 +18,7 @@ restart
 1. irun in gtc.input should be set to 1
 2. history_restart.out should be renamed to history.out
 3. shearab_restart.out should be renamed to shearab.out 
+
+
+Convenience script >> restart_gtc.sh
+(replaces the above files and run gtc)
