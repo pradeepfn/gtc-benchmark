@@ -1,9 +1,5 @@
 ! Copyright 2008 Z. Lin <zhihongl@uci.edu>
-!
-! This file is part of GTC version 1.
-!
-! GTC version 1 is free software: you can redistribute it and/or modify
-! it under the terms of the GNU General Public License as published by
+!  ! This file is part of GTC version 1.  !  ! GTC version 1 is free software: you can redistribute it and/or modify ! it under the terms of the GNU General Public License as published by
 ! the Free Software Foundation, either version 3 of the License, or
 ! (at your option) any later version.
 !
@@ -122,6 +118,13 @@ end module particle_decomp
      hfluxpsi(0:mpsi),hfluxpse(0:mpsi),gradt(mpsi),&
      eigenmode(m_poloidal,num_mode,mpsi),STAT=mtest)
 
+#ifdef DEBUG
+  print *, "value of zonali during allocation : ",zonali
+  print *, "value of zonale during allocation : ",zonale
+  print *, "value of phip00 during allocation : ",phip00
+#endif
+
+
 ! allocate memory
 !  allocate (qtinv(0:mpsi),itran(0:mpsi),mtheta(0:mpsi),&
 !     deltat(0:mpsi),rtemi(0:mpsi),rteme(0:mpsi),pfluxpsi(0:mpsi),rdtemi(0:mpsi),&
@@ -214,13 +217,27 @@ end module particle_decomp
   rtemi=1.0
   rteme=1.0
   rden=1.0
-  phi=0.0
-  phip00=0.0
-  pfluxpsi=0.0
-  rdtemi=0.0
-  rdteme=0.0
-  zonali=0.0
-  zonale=0.0
+  !phi=0.0
+  !phip00=0.0
+  !pfluxpsi=0.0
+  !rdtemi=0.0
+  !rdteme=0.0
+  !zonali=0.0
+  !zonale=0.0
+
+! changing variable init flow to accomodate alloc based restart
+#ifdef DEBUG
+   print *, "irun value : ", irun
+#endif
+  if(irun == 0)then
+   phi=0.0
+   phip00=0.0
+   pfluxpsi=0.0
+   rdtemi=0.0
+   rdteme=0.0
+   zonali=0.0
+   zonale=0.0
+  endif
  
 ! # of marker per grid, Jacobian=(1.0+r*cos(theta+r*sin(theta)))*(1.0+r*cos(theta))
   pmarki=0.0

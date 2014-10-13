@@ -69,6 +69,12 @@ subroutine restart_write
   call nvchkpt_all(mype);
   write(222)mi,me,ntracer
   if(mype==0)write(222)etracer,ptracer
+#ifdef DEBUG
+  print *, "checkpointed zonali value : ", zonali
+  print *, "checkpointed zonale value : ", zonale
+  print *, "checkpointed phip00 value : ", phip00
+#endif
+!DEBUG
 
   !write(222)mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale
   !if(mype==0)write(222)etracer,ptracer
@@ -165,6 +171,11 @@ subroutine restart_read
   print *, "reading checkpointed data..."
   read(333)mi,me,ntracer
   if(mype==0)read(333)etracer,ptracer
+#ifdef DEBUG
+  print *, "zonali value in fortran restart procedure : ",zonali
+  print *, "zonale value in fortran restart procedure : ",zonale
+  print *, "phip00 value in fortran restart proceduere : ",phip00
+#endif
   close(333)
   !read(333)mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale
   !if(mype==0)read(333)etracer,ptracer

@@ -52,6 +52,8 @@
 64BITS=y
 XT3=y
 
+#DFLAG=-DDEBUG
+
 # Default names of some platform-dependent files
 SETUP:=setup.o
 CHARGEI:=chargei.o
@@ -153,7 +155,7 @@ ifeq ($(os),Linux)
   ##  OPT:=-O --ap --pca --trace
  # YX add the following netcdf lib
     NETCDF := -lnetcdf -lnetcdff
-    LIB := -cpp -O -L/usr/lib \
+    LIB := $(DFLAG) -cpp -L/usr/lib \
                -I/usr/include $(NETCDF)
   ifeq ($(PGI),y)
     MPIMODULE:=/usr/pppl/pgi/5.2-1/mpich-1.2.6/include/f90base
@@ -267,7 +269,7 @@ $(CMD): $(OBJ)
 
 #newly added c source files
 c_io.o: c_io.c c_io.h mycheckpoint.h
-	$(CC) -c  c_io.c
+	$(CC) $(DFLAG) -c  c_io.c
 
 module.o : module.F90
 	$(CMP) $(OMPOPT) $(OPT) -c module.F90

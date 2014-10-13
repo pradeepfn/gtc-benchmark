@@ -311,12 +311,9 @@ void checkpoint2(void *base_addr, char *var_name, int process_id, int version, s
 	checkpoint_t chkpt;
 	void *start_addr;
 	strncpy(chkpt.var_name,var_name,VAR_SIZE-1);
-#ifdef DEBUG
-	printf("checkpoint var name : %s",chkpt.var_name);
-#endif
 	chkpt.var_name[VAR_SIZE-1] = '\0'; // null terminating
 #ifdef DEBUG
-	printf("checkpoint var name : %s",chkpt.var_name);
+	printf("checkpoint var name : %s\n",chkpt.var_name);
 #endif
 	chkpt.process_id = process_id;
 	chkpt.version = version;
