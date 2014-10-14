@@ -105,6 +105,7 @@ end module particle_decomp
      tauii=0.532_wp*tauii
   endif
 !zonali, zonale, phip00, pfuxpsi, rdteme, rdtemi, phi, zion, zion0, zelectron, zelectron0, phisave
+  call start_time()
   varname = "zonali"
   cmtsize = mpsi
   call alloc_1d_real(zonali,mpsi,varname, mype, cmtsize)
@@ -118,6 +119,7 @@ end module particle_decomp
   call alloc_1d_real(rdteme,mpsi,varname, mype, cmtsize)
   varname = "rdtemi"
   call alloc_1d_real(rdtemi,mpsi,varname, mype, cmtsize)
+  call end_time()
 
   allocate (qtinv(0:mpsi),itran(0:mpsi),mtheta(0:mpsi),&
      deltat(0:mpsi),rtemi(0:mpsi),rteme(0:mpsi),&
@@ -200,10 +202,12 @@ end module particle_decomp
 	write(stdout,run_parameters)
 	if(stdout /= 6 .and. stdout /= 0)close(stdout)
   end if	
-
+  
+  call start_time()
   varname = "phi"
   cmtsize = mzeta * mgrid
   call alloc_2d_real(phi,mzeta,mgrid,varname, mype, cmtsize)
+  call end_time()
 
   allocate(pgyro(4,mgrid),tgyro(4,mgrid),markeri(mzeta,mgrid),&
      densityi(0:mzeta,mgrid),evector(3,0:mzeta,mgrid),&
@@ -294,12 +298,14 @@ end module particle_decomp
      nparam=6
   endif
 
+   call start_time()
    varname = "zion"
    cmtsize = (nparam -1) * (mi-1)
    call alloc_2d_real(zion,nparam,mimax,varname, mype, cmtsize)
    varname = "zion0"
    cmtsize = (mi-1) 
    call alloc_2d_real(zion0,nparam,mimax,varname, mype, cmtsize)
+   call end_time()
 
 allocate(jtion0(4,mimax),&
      jtion1(4,mimax),kzion(mimax),wzion(mimax),wpion(4,mimax),&
@@ -315,6 +321,7 @@ allocate(jtion0(4,mimax),&
      call MPI_ABORT(MPI_COMM_WORLD,1,ierror)
   endif
   if(nhybrid>0)then
+     call start_time()
      cmtsize = 6 * me
      varname = "zelectron"
      call alloc_2d_real(zelectron,6,memax,varname, mype, cmtsize)
@@ -326,6 +333,7 @@ allocate(jtion0(4,mimax),&
      varname = "phisave"
      cmtsize = mzeta * mgrid * 2*nhybrid
      call alloc_3d_real(phisave,mzeta,mgrid,2*nhybrid,varname,mype,cmtsize)
+     call end_time()
      
      allocate(jtelectron0(memax),&
         jtelectron1(memax),kzelectron(memax),wzelectron(memax),&

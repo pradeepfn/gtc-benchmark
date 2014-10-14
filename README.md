@@ -6,7 +6,7 @@ Gyrokinetic Toroidal Code, Version 1, 2002. Original code location : http://phoe
 Running
 -------------
 
-1. create a ramdisk
+1. create a ramdisk:
 	mount -t tmpfs -o size=4G tmpfs /mnt/ramdisk
 2. make
 3. run_gtc.sh
