@@ -105,6 +105,7 @@ end module particle_decomp
      tauii=0.532_wp*tauii
   endif
 !zonali, zonale, phip00, pfuxpsi, rdteme, rdtemi, phi, zion, zion0, zelectron, zelectron0, phisave
+#ifdef _NVRAM
   call start_time()
   varname = "zonali"
   cmtsize = mpsi
@@ -127,21 +128,23 @@ end module particle_decomp
      pmarke(0:mpsi),phi00(0:mpsi),&
      hfluxpsi(0:mpsi),hfluxpse(0:mpsi),gradt(mpsi),&
      eigenmode(m_poloidal,num_mode,mpsi),STAT=mtest)
+#else
+ !allocate memory
+  allocate (qtinv(0:mpsi),itran(0:mpsi),mtheta(0:mpsi),&
+     deltat(0:mpsi),rtemi(0:mpsi),rteme(0:mpsi),pfluxpsi(0:mpsi),rdtemi(0:mpsi),&
+     rden(0:mpsi),igrid(0:mpsi),pmarki(0:mpsi),rdteme(0:mpsi),&
+     pmarke(0:mpsi),phi00(0:mpsi),phip00(0:mpsi),&
+     hfluxpsi(0:mpsi),hfluxpse(0:mpsi),zonali(0:mpsi),zonale(0:mpsi),gradt(mpsi),&
+     eigenmode(m_poloidal,num_mode,mpsi),STAT=mtest)
+#endif
+!_NVRAM
+
 
 #ifdef DEBUG
   print *, "value of zonali during allocation : ",zonali
   print *, "value of zonale during allocation : ",zonale
   print *, "value of phip00 during allocation : ",phip00
 #endif
-
-
-! allocate memory
-!  allocate (qtinv(0:mpsi),itran(0:mpsi),mtheta(0:mpsi),&
-!     deltat(0:mpsi),rtemi(0:mpsi),rteme(0:mpsi),pfluxpsi(0:mpsi),rdtemi(0:mpsi),&
-!     rden(0:mpsi),igrid(0:mpsi),pmarki(0:mpsi),rdteme(0:mpsi),&
-!     pmarke(0:mpsi),phi00(0:mpsi),phip00(0:mpsi),&
-!     hfluxpsi(0:mpsi),hfluxpse(0:mpsi),zonali(0:mpsi),zonale(0:mpsi),gradt(mpsi),&
-!     eigenmode(m_poloidal,num_mode,mpsi),STAT=mtest)
   if (mtest /= 0) then
      write(0,*)mype,'*** Cannot allocate qtinv: mtest=',mtest
      call MPI_ABORT(MPI_COMM_WORLD,1,ierror)
@@ -203,6 +206,7 @@ end module particle_decomp
 	if(stdout /= 6 .and. stdout /= 0)close(stdout)
   end if	
   
+#ifdef _NVRAM
   call start_time()
   varname = "phi"
   cmtsize = mzeta * mgrid
@@ -214,33 +218,30 @@ end module particle_decomp
      jtp1(2,mgrid,mzeta),jtp2(2,mgrid,mzeta),wtp1(2,mgrid,mzeta),&
      wtp2(2,mgrid,mzeta),dtemper(mgrid,mzeta),heatflux(mgrid,mzeta),&
      STAT=mtest)
-! allocate memory
-!  allocate(pgyro(4,mgrid),tgyro(4,mgrid),markeri(mzeta,mgrid),&
-!     densityi(0:mzeta,mgrid),phi(0:mzeta,mgrid),evector(3,0:mzeta,mgrid),&
-!     jtp1(2,mgrid,mzeta),jtp2(2,mgrid,mzeta),wtp1(2,mgrid,mzeta),&
-!     wtp2(2,mgrid,mzeta),dtemper(mgrid,mzeta),heatflux(mgrid,mzeta),&
-!     STAT=mtest)
+#else
+ !allocate memory
+  allocate(pgyro(4,mgrid),tgyro(4,mgrid),markeri(mzeta,mgrid),&
+     densityi(0:mzeta,mgrid),phi(0:mzeta,mgrid),evector(3,0:mzeta,mgrid),&
+     jtp1(2,mgrid,mzeta),jtp2(2,mgrid,mzeta),wtp1(2,mgrid,mzeta),&
+     wtp2(2,mgrid,mzeta),dtemper(mgrid,mzeta),heatflux(mgrid,mzeta),&
+     STAT=mtest)
+#endif
+!_NVRAM
   if (mtest /= 0) then
      write(0,*)mype,'*** setup: Cannot allocate pgyro: mtest=',mtest
      call MPI_ABORT(MPI_COMM_WORLD,1,ierror)
   endif
 
+#ifdef DEBUG
+   print *, "irun value : ", irun
+#endif
 ! temperature and density on the grid, T_i=n_0=1 at mid-radius
   rtemi=1.0
   rteme=1.0
   rden=1.0
-  !phi=0.0
-  !phip00=0.0
-  !pfluxpsi=0.0
-  !rdtemi=0.0
-  !rdteme=0.0
-  !zonali=0.0
-  !zonale=0.0
 
 ! changing variable init flow to accomodate alloc based restart
-#ifdef DEBUG
-   print *, "irun value : ", irun
-#endif
+#ifdef _NVRAM
   if(irun == 0)then
    phi=0.0
    phip00=0.0
@@ -250,6 +251,16 @@ end module particle_decomp
    zonali=0.0
    zonale=0.0
   endif
+#else
+  phi=0.0
+  phip00=0.0
+  pfluxpsi=0.0
+  rdtemi=0.0
+  rdteme=0.0
+  zonali=0.0
+  zonale=0.0
+#endif
+!_NVRAM
  
 ! # of marker per grid, Jacobian=(1.0+r*cos(theta+r*sin(theta)))*(1.0+r*cos(theta))
   pmarki=0.0
@@ -298,6 +309,7 @@ end module particle_decomp
      nparam=6
   endif
 
+#ifdef _NVRAM
    call start_time()
    varname = "zion"
    cmtsize = (nparam -1) * (mi-1)
@@ -310,17 +322,20 @@ end module particle_decomp
 allocate(jtion0(4,mimax),&
      jtion1(4,mimax),kzion(mimax),wzion(mimax),wpion(4,mimax),&
      wtion0(4,mimax),wtion1(4,mimax),STAT=mtest)
+#else
 
-
-! allocate memory
-!  allocate(zion(nparam,mimax),zion0(nparam,mimax),jtion0(4,mimax),&
-!     jtion1(4,mimax),kzion(mimax),wzion(mimax),wpion(4,mimax),&
-!     wtion0(4,mimax),wtion1(4,mimax),STAT=mtest)
+ !allocate memory
+  allocate(zion(nparam,mimax),zion0(nparam,mimax),jtion0(4,mimax),&
+     jtion1(4,mimax),kzion(mimax),wzion(mimax),wpion(4,mimax),&
+     wtion0(4,mimax),wtion1(4,mimax),STAT=mtest)
+#endif
+!_NVRAM
   if (mtest /= 0) then
      write(0,*)mype,'*** Cannot allocate zion: mtest=',mtest
      call MPI_ABORT(MPI_COMM_WORLD,1,ierror)
   endif
   if(nhybrid>0)then
+#ifdef _NVRAM
      call start_time()
      cmtsize = 6 * me
      varname = "zelectron"
@@ -340,13 +355,14 @@ allocate(jtion0(4,mimax),&
         wpelectron(memax),wtelectron0(memax),wtelectron1(memax),&
         markere(mzeta,mgrid),densitye(0:mzeta,mgrid),zelectron1(6,memax),&
         phit(0:mzeta,mgrid),STAT=mtest)
-    
-
-!     allocate(zelectron(6,memax),zelectron0(6,memax),jtelectron0(memax),&
-!        jtelectron1(memax),kzelectron(memax),wzelectron(memax),&
-!        wpelectron(memax),wtelectron0(memax),wtelectron1(memax),&
-!        markere(mzeta,mgrid),densitye(0:mzeta,mgrid),zelectron1(6,memax),&
-!        phisave(0:mzeta,mgrid,2*nhybrid),phit(0:mzeta,mgrid),STAT=mtest)
+#else 
+     allocate(zelectron(6,memax),zelectron0(6,memax),jtelectron0(memax),&
+        jtelectron1(memax),kzelectron(memax),wzelectron(memax),&
+        wpelectron(memax),wtelectron0(memax),wtelectron1(memax),&
+        markere(mzeta,mgrid),densitye(0:mzeta,mgrid),zelectron1(6,memax),&
+        phisave(0:mzeta,mgrid,2*nhybrid),phit(0:mzeta,mgrid),STAT=mtest)
+#endif
+!_NVRAM
      if(mtest /= 0) then
         write(0,*)mype,'*** Cannot allocate zelectron: mtest=',mtest
         call MPI_ABORT(MPI_COMM_WORLD,1,ierror)
