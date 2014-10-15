@@ -74,7 +74,7 @@ end module particle_decomp
     call resume_step
     mstep=max(2,mstep-restart_step)
   endif
-  print *, "mstep : ", mstep
+  print *, "mstep,restart_step ", mstep, restart_step
   msnap=min(msnap,mstep/ndiag)
   isnap=mstep/msnap
   idiag1=mpsi/2

@@ -68,18 +68,16 @@ subroutine restart_write
 ! record particle information for future restart run
   write(222)mi,me,ntracer,istep+mstepall
   if(mype==0)write(222)etracer,ptracer
-  print *, "before close.."
-  close(222)
-  print *, "after close.."
   !call nvchkpt_all(mype);
 #else
-  write(222)mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale
+  write(222)istep+mstepall,mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale
   if(mype==0)write(222)etracer,ptracer
   write(222)zion(1:nparam,1:mi),zion0(6,1:mi)
   if(nhybrid>0)write(222)phisave,zelectron(1:6,1:me),zelectron0(6,1:me)
-  close(222)
 #endif
 !_NVRAM
+
+  close(222)
 
 #ifdef DEBUG
   print *, "mi, me , ntracer, etracer, ptracer ", mi, me, ntracer,istep, etracer, ptracer
@@ -179,14 +177,13 @@ subroutine restart_read
   print *, "reading checkpointed data..."
   read(333)mi,me,ntracer,restart_step
   if(mype==0)read(333)etracer,ptracer
-  close(333)
 #else
-  read(333)mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale
+  read(333)restart_step,mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale
   if(mype==0)read(333)etracer,ptracer
   read(333)zion(1:nparam,1:mi),zion0(6,1:mi)
   if(nhybrid>0)read(333)phisave,zelectron(1:6,1:me),zelectron0(6,1:me)
-  close(333)
 #endif
+  close(333)
 
 #ifdef DEBUG
   print *, "restart values mi,me,ntracer,restart_step,etracer,ptracer : ",mi,me,ntracer,restart_step,etracer,ptracer
@@ -237,9 +234,7 @@ subroutine resume_step
   endif
 
   open(333,file=fname,status='old',form='unformatted')
-  print *, "reading restart step value..."
   ! reading the last step 
-    read(333)mi,me,ntracer,restart_step
+  read(333)restart_step
   close(333)
-  print *, "restart_step : ", restart_step
 end subroutine
