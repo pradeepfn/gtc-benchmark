@@ -16,6 +16,10 @@ void* nvread(char *var, int id);
 
 void start_time_();
 
+void pause_time_();
+
+void resume_time_();
+
 void end_time_();
 
 #ifdef __cplusplus

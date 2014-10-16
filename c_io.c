@@ -40,6 +40,7 @@ struct entry {
 struct timeval t_start;
 struct timeval t_end;
 size_t tot_rbytes;
+unsigned long tot_etime;
 
 
 unsigned long get_elapsed_time(struct timeval *end, struct timeval *start){
@@ -293,7 +294,7 @@ int is_remaining_space_enough(int process_id){
 		}
 	}	
 	gettimeofday(&t2,NULL);
-	printf("time checkpoint: (%zd,%zd) \n",tot_chkpt_size, get_elapsed_time(&t2,&t1));
+	//printf("time checkpoint: (%zd,%zd) \n",tot_chkpt_size, get_elapsed_time(&t2,&t1));
 	pthread_mutex_unlock(&mtx);
 	return;
 }
@@ -422,11 +423,21 @@ void *nvread(char *var, int id){
 void start_time_(){
 	gettimeofday(&t_start,NULL);
 	tot_rbytes =0;
+	tot_etime=0;
 }
 
+void pause_time_(){
+	gettimeofday(&t_end,NULL);
+	tot_etime+=get_elapsed_time(&t_end,&t_start);
 
+}
+
+void resume_time_(){
+	gettimeofday(&t_start,NULL);
+}
 
 void end_time_(){
 	gettimeofday(&t_end,NULL);
-	printf("batch read (bytes : time ): ( %zd :  %zd ) \n",tot_rbytes, get_elapsed_time(&t_end,&t_start));
+	tot_etime+=get_elapsed_time(&t_end,&t_start);
+	printf("batch read (bytes : time ): ( %zd :  %zd ) \n",tot_rbytes, tot_etime);
 }
