@@ -64,11 +64,11 @@ subroutine restart_write
   else
      open(222,file=cdum,status='replace',form='unformatted')
   endif
-#ifdef _NVRAM
+#ifdef _NVRAM_RESTART
 ! record particle information for future restart run
-  write(222)mi,me,ntracer,istep+mstepall
+  write(222)istep+mstepall,mi,me,ntracer
   if(mype==0)write(222)etracer,ptracer
-  !call nvchkpt_all(mype);
+  call nvchkpt_all(mype);
 #else
   write(222)istep+mstepall,mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale
   if(mype==0)write(222)etracer,ptracer
@@ -173,9 +173,9 @@ subroutine restart_read
   open(333,file=cdum,status='old',form='unformatted')
 
 ! read particle information to restart previous run
-#ifdef _NVRAM
+#ifdef _NVRAM_RESTART
   print *, "reading checkpointed data..."
-  read(333)mi,me,ntracer,restart_step
+  read(333)restart_step,mi,me,ntracer
   if(mype==0)read(333)etracer,ptracer
 #else
   read(333)restart_step,mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale

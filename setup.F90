@@ -73,6 +73,7 @@ end module particle_decomp
   else
     call resume_step
     mstep=max(2,mstep-restart_step)
+    print *, "mstep,restart_step ", mstep, restart_step
   endif
   print *, "mstep,restart_step ", mstep, restart_step
   msnap=min(msnap,mstep/ndiag)
@@ -108,18 +109,18 @@ end module particle_decomp
 #ifdef _NVRAM
   call start_time()
   varname = "zonali"
-  cmtsize = mpsi
-  call alloc_1d_real(zonali,mpsi,varname, mype, cmtsize)
+  cmtsize = mpsi+1
+  call alloc_1d_real(zonali,mpsi+1,varname, mype, cmtsize)
   varname = "zonale"
-  call alloc_1d_real(zonale,mpsi,varname, mype, cmtsize)
+  call alloc_1d_real(zonale,mpsi+1,varname, mype, cmtsize)
   varname = "phip00"
-  call alloc_1d_real(phip00,mpsi,varname, mype, cmtsize)
+  call alloc_1d_real(phip00,mpsi+1,varname, mype, cmtsize)
   varname = "pfluxpsi"
-  call alloc_1d_real(pfluxpsi,mpsi,varname, mype, cmtsize)
+  call alloc_1d_real(pfluxpsi,mpsi+1,varname, mype, cmtsize)
   varname = "rdteme"
-  call alloc_1d_real(rdteme,mpsi,varname, mype, cmtsize)
+  call alloc_1d_real(rdteme,mpsi+1,varname, mype, cmtsize)
   varname = "rdtemi"
-  call alloc_1d_real(rdtemi,mpsi,varname, mype, cmtsize)
+  call alloc_1d_real(rdtemi,mpsi+1,varname, mype, cmtsize)
   call end_time()
 
   allocate (qtinv(0:mpsi),itran(0:mpsi),mtheta(0:mpsi),&
@@ -209,8 +210,8 @@ end module particle_decomp
 #ifdef _NVRAM
   call start_time()
   varname = "phi"
-  cmtsize = mzeta * mgrid
-  call alloc_2d_real(phi,mzeta,mgrid,varname, mype, cmtsize)
+  cmtsize = (mzeta+1) * mgrid
+  call alloc_2d_real(phi,mzeta+1,mgrid,varname, mype, cmtsize)
   call end_time()
 
   allocate(pgyro(4,mgrid),tgyro(4,mgrid),markeri(mzeta,mgrid),&
@@ -241,7 +242,7 @@ end module particle_decomp
   rden=1.0
 
 ! changing variable init flow to accomodate alloc based restart
-#ifdef _NVRAM
+#ifdef _NVRAM_RESTART
   if(irun == 0)then
    phi=0.0
    phip00=0.0
@@ -312,10 +313,10 @@ end module particle_decomp
 #ifdef _NVRAM
    call start_time()
    varname = "zion"
-   cmtsize = (nparam -1) * (mi-1)
+   cmtsize = nparam * mimax
    call alloc_2d_real(zion,nparam,mimax,varname, mype, cmtsize)
    varname = "zion0"
-   cmtsize = (mi-1) 
+   cmtsize = nparam*mimax 
    call alloc_2d_real(zion0,nparam,mimax,varname, mype, cmtsize)
    call end_time()
 
@@ -337,17 +338,17 @@ allocate(jtion0(4,mimax),&
   if(nhybrid>0)then
 #ifdef _NVRAM
      call start_time()
-     cmtsize = 6 * me
+     cmtsize = 6*memax
      varname = "zelectron"
      call alloc_2d_real(zelectron,6,memax,varname, mype, cmtsize)
 
-     cmtsize = me
+     cmtsize = 6*memax
      varname = "zelectron0"
      call alloc_2d_real(zelectron0,6,memax,varname, mype, cmtsize)
  
      varname = "phisave"
-     cmtsize = mzeta * mgrid * 2*nhybrid
-     call alloc_3d_real(phisave,mzeta,mgrid,2*nhybrid,varname,mype,cmtsize)
+     cmtsize = (mzeta+1) * mgrid * 2*nhybrid
+     call alloc_3d_real(phisave,mzeta+1,mgrid,2*nhybrid,varname,mype,cmtsize)
      call end_time()
      
      allocate(jtelectron0(memax),&
