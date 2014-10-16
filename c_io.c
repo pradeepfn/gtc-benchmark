@@ -420,7 +420,16 @@ void *nvread(char *var, int id){
     return buffer;
 }
 
-void start_time_(){
+FILE *fp;
+int irun;
+void start_time_(int *processes, int *mype,int *restart){
+	irun=*restart;
+	if(irun == 1){
+		char file_name[32];
+		snprintf(file_name,sizeof(file_name),"stats/nvram_n%d_p%d.log",*processes,*mype);
+		fp=fopen(file_name,"w");
+		fprintf(fp,"bytes,micro_sec\n");
+	}
 	gettimeofday(&t_start,NULL);
 	tot_rbytes =0;
 	tot_etime=0;
@@ -439,5 +448,9 @@ void resume_time_(){
 void end_time_(){
 	gettimeofday(&t_end,NULL);
 	tot_etime+=get_elapsed_time(&t_end,&t_start);
+	if(irun == 1){//write upon valid data reads
+		fprintf(fp,"%lu,%lu\n",tot_rbytes,tot_etime);
+		fclose(fp);
+	}
 	printf("batch read (bytes : time ): ( %zd :  %zd ) \n",tot_rbytes, tot_etime);
 }

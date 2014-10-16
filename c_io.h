@@ -14,7 +14,7 @@ void* my_alloc_(unsigned int* n, char *s, int *iid);
 
 void* nvread(char *var, int id);
 
-void start_time_();
+void start_time_(int *processes, int *mype,int *restart);
 
 void pause_time_();
 

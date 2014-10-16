@@ -2,14 +2,7 @@
 !  ! This file is part of GTC version 1.  !  ! GTC version 1 is free software: you can redistribute it and/or modify ! it under the terms of the GNU General Public License as published by
 ! the Free Software Foundation, either version 3 of the License, or
 ! (at your option) any later version.
-!
-! GTC version 1 is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with GTC version 1.  If not, see <http://www.gnu.org/licenses/>.
+!  ! GTC version 1 is distributed in the hope that it will be useful, ! but WITHOUT ANY WARRANTY; without even the implied warranty of ! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the ! GNU General Public License for more details.  !  ! You should have received a copy of the GNU General Public License ! along with GTC version 1.  If not, see <http://www.gnu.org/licenses/>.
 
 !========================================================================
 
@@ -107,7 +100,7 @@ end module particle_decomp
   endif
 !zonali, zonale, phip00, pfuxpsi, rdteme, rdtemi, phi, zion, zion0, zelectron, zelectron0, phisave
 #ifdef _NVRAM
-  call start_time()
+  call start_time(numberpe,mype,irun)
   varname = "zonali"
   cmtsize = mpsi+1
   call alloc_1d_real(zonali,mpsi+1,varname, mype, cmtsize)
