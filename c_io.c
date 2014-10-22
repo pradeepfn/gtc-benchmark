@@ -422,11 +422,11 @@ void *nvread(char *var, int id){
 
 FILE *fp;
 int irun;
-void start_time_(int *processes, int *mype,int *restart){
+void start_time_(int *processes, int *mype, int *mpsi, int *restart){
 	irun=*restart;
 	if(irun == 1){
 		char file_name[32];
-		snprintf(file_name,sizeof(file_name),"stats/nvram_n%d_p%d.log",*processes,*mype);
+		snprintf(file_name,sizeof(file_name),"stats/nvram_n%d_p%d_mpsi%d.log",*processes,*mype,*mpsi);
 		fp=fopen(file_name,"w");
 		fprintf(fp,"bytes,micro_sec\n");
 	}

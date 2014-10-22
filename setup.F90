@@ -100,7 +100,7 @@ end module particle_decomp
   endif
 !zonali, zonale, phip00, pfuxpsi, rdteme, rdtemi, phi, zion, zion0, zelectron, zelectron0, phisave
 #ifdef _NVRAM
-  call start_time(numberpe,mype,irun)
+  call start_time(numberpe,mype,mpsi,irun)
   varname = "zonali"
   cmtsize = mpsi+1
   call alloc_1d_real(zonali,mpsi+1,varname, mype, cmtsize)
