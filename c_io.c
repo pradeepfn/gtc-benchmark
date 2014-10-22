@@ -425,7 +425,7 @@ int irun;
 void start_time_(int *processes, int *mype, int *mpsi, int *restart){
 	irun=*restart;
 	if(irun == 1){
-		char file_name[32];
+		char file_name[50];
 		snprintf(file_name,sizeof(file_name),"stats/nvram_n%d_p%d_mpsi%d.log",*processes,*mype,*mpsi);
 		fp=fopen(file_name,"w");
 		fprintf(fp,"bytes,micro_sec\n");
