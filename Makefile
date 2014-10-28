@@ -269,8 +269,8 @@ $(CMD): $(OBJ)
 	$(CMP) $(OMPOPT) $(OPT) -o $(CMD) $(OBJ) $(LIB) 
 
 #newly added c source files
-c_io.o: c_io.c c_io.h mycheckpoint.h
-	$(CC) $(DFLAG) -c  c_io.c
+c_io.o: checkpoint/c_io.c checkpoint/c_io.h checkpoint/mycheckpoint.h
+	$(CC) $(DFLAG) -c  checkpoint/c_io.c
 
 module.o : module.F90
 	$(CMP) $(OMPOPT) $(OPT) -c module.F90
