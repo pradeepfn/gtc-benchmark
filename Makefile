@@ -320,4 +320,6 @@ restartclean:
 	rm -f sheareb_restart.out
 	rm -f DATA_RESTART*
 	rm -f nvm.lck*
+	rm -f PHI*
+	rm -f NCD*
 	rm -f /mnt/ramdisk/*
