@@ -4,6 +4,9 @@
 extern "C" {
 #endif
 
+//interface for persistent allocation
+void* alloc_(size_t size, char *var, int id, size_t commit_size);
+
 int write_io_( float *f, int *elements, int *num_proc, int *iid);
 
 void *nv_restart_(char *var, int *id);

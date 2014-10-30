@@ -12,7 +12,9 @@
 #include <assert.h>
 #include <pthread.h>
 #include "mycheckpoint.h"
+#include <c_io.h>
 
+#define _USENVMLIB
 
 #define FILE_PATH_ONE "/mnt/ramdisk/mmap.file.one"
 #define FILE_PATH_TWO "/mnt/ramdisk/mmap.file.two"
@@ -158,6 +160,17 @@ memmap_t *get_latest_mapfile(memmap_t *m1,memmap_t *m2){
 	}
 }
 
+void* alloc_( size_t size, char *var, int id, size_t commit_size)
+{
+		//printf("allocating space : %d \n", size);
+#ifdef _USENVMLIB
+		return p_c_nvalloc_(size, var, id);	
+#else
+		return malloc(size);
+#endif
+}
+
+
 int myinitialized = 0;
 void *alloc(size_t size, char *var_name, int process_id, size_t commit_size){
     pthread_mutex_lock(&mtx);
@@ -176,7 +189,8 @@ void *alloc(size_t size, char *var_name, int process_id, size_t commit_size){
 #ifdef DEBUG
 		printf("allocating from the heap space\n");
 #endif
-		n->ptr = malloc(size); // allocating memory for incoming request
+		//all allocations should go to alloc_
+		n->ptr = alloc_(size, var_name, process_id, commit_size); // allocating memory for incoming request
 	}
     n->size = size;
 	//memcopying the variable names. otherwise
@@ -372,11 +386,6 @@ int get_new_offset(offset_t offset, size_t data_size){
 	return temp; 
 }
 
-void* alloc_( unsigned int size, char *var, int id, int commit_size)
-{
-		//printf("allocating space : %d \n", size);
-		return malloc(size);
-}
 
 // allocates n bytes using the 
 void* my_alloc_(unsigned int* n, char *s, int *iid, int *cmtsize) {
