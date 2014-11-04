@@ -22,6 +22,15 @@ Running
 2. make
 3. run_gtc.sh
 
+Important
+-----------------
+
+During each first run, the code creates nvm.lck files, to identify whether this is a fresh run or restart run.
+remove them if you are doing testing. Invoking,
+
+make restartclean will do that for you.
+
+
 restart
 ------------
 
