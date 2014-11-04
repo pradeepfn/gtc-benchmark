@@ -321,3 +321,4 @@ restartclean:
 	rm -f DATA_RESTART*
 	rm -f nvm.lck*
 	rm -f /mnt/ramdisk/*
+	rm -rf /mnt/pvm/*
