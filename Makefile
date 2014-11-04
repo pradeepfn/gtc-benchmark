@@ -323,3 +323,4 @@ restartclean:
 	rm -f PHI*
 	rm -f NCD*
 	rm -f /mnt/ramdisk/*
+	rm -rf /mnt/pvm/*

@@ -1,5 +1,3 @@
-#define _GNU_SOURCE
-
 #include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
@@ -21,10 +19,12 @@
 //#define FILE_SIZE 600
 #define FILE_SIZE 1000000000
 #define MICROSEC 1000000
+
 pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
 memmap_t m[2];
 memmap_t *current;
 offset_t offset;
+
 //LIST_HEAD(listhead, entry) head=
 //	LIST_HEAD_INITIALIZER(head);
 LIST_HEAD(listhead, entry) head;
@@ -160,11 +160,11 @@ memmap_t *get_latest_mapfile(memmap_t *m1,memmap_t *m2){
 	}
 }
 
-void* alloc_( size_t size, char *var, int id, size_t commit_size)
+void* alloc_if( size_t size, char *var, int id, size_t commit_size)
 {
-		//printf("allocating space : %d \n", size);
 #ifdef _USENVMLIB
-		return p_c_nvalloc_(size, var, id);	
+		return p_c_nvalloc_(size, var, 0, id);	
+		//return malloc(size);
 #else
 		return malloc(size);
 #endif
@@ -190,7 +190,7 @@ void *alloc(size_t size, char *var_name, int process_id, size_t commit_size){
 		printf("allocating from the heap space\n");
 #endif
 		//all allocations should go to alloc_
-		n->ptr = alloc_(size, var_name, process_id, commit_size); // allocating memory for incoming request
+		n->ptr = alloc_if(size, var_name, process_id, commit_size); // allocating memory for incoming request
 	}
     n->size = size;
 	//memcopying the variable names. otherwise
@@ -463,3 +463,6 @@ void end_time_(){
 	}
 	printf("batch read (bytes : time ): ( %zd :  %zd ) \n",tot_rbytes, tot_etime);
 }
+
+
+

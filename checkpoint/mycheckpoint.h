@@ -1,9 +1,11 @@
-#ifndef __MYCHECKPOINT_H
-#define __MYCHECKPOINT_H
+//#ifndef __MYCHECKPOINT_H
+//#define __MYCHECKPOINT_H
 #include <stddef.h>
 #include <sys/time.h>
 #define VAR_SIZE 20
+
 typedef enum { false, true } bool;
+
 typedef long offset_t;
 // meta data structure used during data persistance
 // id + version defines a unique structure.
@@ -49,6 +51,6 @@ int get_new_offset(offset_t offset, size_t data_size);
 void mmap_files(memmap_t *m, const char *file_name);
 void copy_head_to_mem(memmap_t *m, int fileId);
 memmap_t *get_latest_mapfile(memmap_t *m1,memmap_t *m2);
-void *nvread(char *var, int id);
-#endif
+
+//#endif
 

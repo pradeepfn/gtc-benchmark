@@ -1,11 +1,9 @@
 #include <stdio.h>
+#include <c_io.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-//interface for persistent allocation
-void* alloc_(size_t size, char *var, int id, size_t commit_size);
 
 int write_io_( float *f, int *elements, int *num_proc, int *iid);
 
@@ -24,6 +22,8 @@ void pause_time_();
 void resume_time_();
 
 void end_time_();
+
+extern void* nvalloc_( size_t size, char *var, int id);
 
 #ifdef __cplusplus
 }
