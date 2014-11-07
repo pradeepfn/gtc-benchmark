@@ -21,9 +21,9 @@ setwd("../stats/")
 orig_time_vec<-numeric();
 bytes_vec<-numeric();
 num_vec<-numeric();
-for(i in seq(10,19,by=2))
+for(i in seq(50,401,by=50))
 {
-	regex<-paste('nvram_n4_p._mpsi',i,'\\.log$', sep="");
+	regex<-paste('nvram_n8_p._mpsi',i,'\\.log$', sep="");
 	listfiles <- list.files(path="./",pattern=regex,full.names=TRUE);
 	ans<-rd_time(listfiles);
 	orig_time_vec<-c(orig_time_vec,ans[1]);
