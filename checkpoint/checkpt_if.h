@@ -25,6 +25,18 @@ void end_time_();
 
 extern void* nvalloc_( size_t size, char *var, int id);
 
+
+/*Memory protection related methods*/
+int enable_protection(void *ptr, size_t size);
+
+int disable_protection(void *ptr) ;
+
+static void
+handler(int sig, siginfo_t *si, void *unused);
+
+void install_handler()
+/*Memory protection related methods*/
+
 #ifdef __cplusplus
 }
 #endif
