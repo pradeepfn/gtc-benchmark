@@ -172,7 +172,10 @@ void* alloc_if( size_t size, char *var, int id, size_t commit_size)
 
 
 int myinitialized = 0;
-void *alloc(size_t size, char *var_name, int process_id, size_t commit_size){
+void *alloc(char *var_name, size_t size, size_t commit_size,int process_id){
+	if(commit_size == -1){
+		commit_size = size;
+	}
     pthread_mutex_lock(&mtx);
     //init calls happens once
     if(!myinitialized){
@@ -389,7 +392,7 @@ int get_new_offset(offset_t offset, size_t data_size){
 
 // allocates n bytes using the 
 void* my_alloc_(unsigned int* n, char *s, int *iid, int *cmtsize) {
-	return alloc(*n, s, *iid, *cmtsize); 
+	return alloc(s,*n,*cmtsize,*iid); 
 }
  
 void my_free_(char* arr) {

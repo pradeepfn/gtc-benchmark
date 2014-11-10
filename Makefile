@@ -53,7 +53,7 @@
 XT3=y
 
 #DFLAG= -g -DDEBUG
-DFLAG= -D_NVRAM -D_NVRAM_RESTART
+DFLAG= -D_NVRAM -D_NVRAM_RESTART 
 
 # Default names of some platform-dependent files
 SETUP:=setup.o
@@ -157,7 +157,7 @@ ifeq ($(os),Linux)
  # YX add the following netcdf lib
     NETCDF := -lnetcdf -lnetcdff
     LIB := $(DFLAG) -cpp -L/usr/lib \
-               -I/usr/include $(NETCDF) -lnvmchkpt
+               -I/usr/include $(NETCDF) -lnvmchkpt 
   ifeq ($(PGI),y)
     MPIMODULE:=/usr/pppl/pgi/5.2-1/mpich-1.2.6/include/f90base
     F90C:=pgf90
@@ -270,7 +270,7 @@ $(CMD): $(OBJ)
 
 #newly added c source files
 checkpt_if.o: checkpoint/checkpt_if.c checkpoint/checkpt_if.h checkpoint/mycheckpoint.h
-	$(CC) $(DFLAG) -c  checkpoint/checkpt_if.c
+	$(CC) $(DFLAG) -c -g  checkpoint/checkpt_if.c
 
 module.o : module.F90
 	$(CMP) $(OMPOPT) $(OPT) -c module.F90
