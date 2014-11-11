@@ -32,8 +32,6 @@ function kill_gtc(){
 
 echo "cleaning artifacts from the previous run"
 make restartclean
-make clean
-make
 
 echo "starting the gtc program"
 start_gtc

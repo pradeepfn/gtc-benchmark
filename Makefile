@@ -53,7 +53,7 @@
 XT3=y
 
 #DFLAG= -g -DDEBUG
-DFLAG= -D_NVRAM -D_NVRAM_RESTART 
+#DFLAG= -D_NVRAM -D_NVRAM_RESTART 
 
 # Default names of some platform-dependent files
 SETUP:=setup.o

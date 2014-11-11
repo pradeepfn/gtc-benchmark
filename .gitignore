@@ -35,3 +35,5 @@ gtc
 
 #log file
 *.log
+NCD*
+PHI*
