@@ -177,6 +177,9 @@ program gtc
 #ifdef __NERSC
 !  call system_stats()
 #endif
+! we take the end timestamp
+call end_timestamp(numberpe,mype,mpsi,irun)
+
 
 ! MPI finalize
   call mpi_finalize(ierror)
