@@ -157,7 +157,7 @@ ifeq ($(os),Linux)
  # YX add the following netcdf lib
     NETCDF := -lnetcdf -lnetcdff
     LIB := $(DFLAG) -cpp -L/usr/lib \
-               -I/usr/include $(NETCDF)
+               -I/usr/include $(NETCDF) -lnvmchkpt
   ifeq ($(PGI),y)
     MPIMODULE:=/usr/pppl/pgi/5.2-1/mpich-1.2.6/include/f90base
     F90C:=pgf90
@@ -257,7 +257,7 @@ endif
 OBJ:=allocate.o module.o main.o function.o $(SETUP) ran_num_gen.o set_random_values.o \
     load.o restart.o diagnosis.o snapshot.o $(CHARGEI) $(POISSON) smooth.o \
     field.o $(PUSHI) $(SHIFTI) $(FFT) tracking.o \
-    dataout3d.o c_io.o 
+    dataout3d.o checkpt_if.o 
 ## mem_check.o \
 ##    output3d_serial.o output.o
 
@@ -269,8 +269,8 @@ $(CMD): $(OBJ)
 	$(CMP) $(OMPOPT) $(OPT) -o $(CMD) $(OBJ) $(LIB) 
 
 #newly added c source files
-c_io.o: c_io.c c_io.h mycheckpoint.h
-	$(CC) $(DFLAG) -c  c_io.c
+checkpt_if.o: checkpoint/checkpt_if.c checkpoint/checkpt_if.h checkpoint/mycheckpoint.h
+	$(CC) $(DFLAG) -c  checkpoint/checkpt_if.c
 
 module.o : module.F90
 	$(CMP) $(OMPOPT) $(OPT) -c module.F90
@@ -320,4 +320,7 @@ restartclean:
 	rm -f sheareb_restart.out
 	rm -f DATA_RESTART*
 	rm -f nvm.lck*
+	rm -f PHI*
+	rm -f NCD*
 	rm -f /mnt/ramdisk/*
+	rm -rf /mnt/pvm/*

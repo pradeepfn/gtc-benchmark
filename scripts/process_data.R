@@ -1,8 +1,8 @@
 mean_rd_time<-function(filelist)
 {
 	mrgddata <- do.call(rbind, lapply(filelist, read.csv));
-	read_byte_time<-(sum(mrgddata$micro_sec)/sum(mrgddata$bytes));
-	val <- c(read_byte_time*2^20*10,mean(mrgddata$micro_sec),mrgddata$bytes[1]/2^20);
+	read_byte_time<-(sum(mrgddata$micro_sec)/sum(as.numeric(mrgddata$bytes)));
+	val <- c(read_byte_time*2^20*10*5,mean(mrgddata$micro_sec),mrgddata$bytes[1]/2^20);
 }
 
 
@@ -17,7 +17,8 @@ process_vec<-numeric();
 norm_time_vec<-numeric();
 orig_time_vec<-numeric();
 bytes_vec<-numeric();
-for(i in seq(2,11,by=2))
+#for(i in seq(2,11,by=2))
+for(i in c(4,8,16,32,64))
 {
 	regex<-paste('nvram_n',i,'.*\\.log$', sep="");
 	listfiles <- list.files(path="./",pattern=regex,full.names=TRUE);
