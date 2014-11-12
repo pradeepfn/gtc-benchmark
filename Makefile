@@ -298,3 +298,12 @@ PHI_dat_to_ncd: PHI_dat_to_ncd.f90
 clean:
 	rm -f $(CMD) $(OBJ) *.mod
 
+restartclean:
+	rm -f NCD*
+	rm -f PHI*
+	rm -f DATA_RESTART*
+	rm -f history.out
+	rm -f history_restart.out
+	rm -f sheareb.out
+	rm -f sheareb_restart.out
+

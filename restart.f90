@@ -159,7 +159,6 @@ subroutine restart_read
   open(333,file=cdum,status='old',form='unformatted')
 
 ! read particle information to restart previous run
-  print *, "reading checkpointed data..."
   read(333)mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale
   if(mype==0)read(333)etracer,ptracer
   read(333)zion(1:nparam,1:mi),zion0(6,1:mi)
