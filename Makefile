@@ -327,3 +327,7 @@ restartclean:
 	rm -f NCD*
 	rm -f /mnt/ramdisk/*
 	rm -rf /mnt/pvm/*
+
+logclean:
+	rm -rf stats/nvram*
+	rm -rf stats/tot*
