@@ -306,11 +306,7 @@ PHI_dat_to_ncd: PHI_dat_to_ncd.f90
 
 clean:
 	rm -f $(CMD) $(OBJ) *.mod
-	rm -f snap*.out
-	rm -f PHI*.ncd
-	rm -f NCD*
-	rm -f histry*.bak
-	rm -f RUNdimen.ncd
+
 	rm -f gtc.input
 
 restartclean:
@@ -319,5 +315,9 @@ restartclean:
 	rm -f sheareb.out
 	rm -f sheareb_restart.out
 	rm -f DATA_RESTART*
-	rm -f nvm.lck*
+	rm -f snap*.out
+	rm -f PHI*.ncd
+	rm -f NCD*
+	rm -f histry*.bak
+	rm -f RUNdimen.ncdrm -f nvm.lck*
 	rm -f /mnt/ramdisk/*
