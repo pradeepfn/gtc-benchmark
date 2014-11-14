@@ -26,7 +26,7 @@ subroutine restart_write
   character(len=10) restart_dir
   character(len=60) file_name
   real(wp) dum
-  integer i,j,mquantity,mflx,n_mode,mstepfinal,noutputs
+  integer i,j,mquantity,mflx,n_mode,mstepfinal,noutputs,notify
   integer save_restart_files,ierr
 
   !save_restart_files=1
@@ -124,6 +124,19 @@ subroutine restart_write
      close(777)
      if(istep==mstep)close(444)
   endif
+
+!we are introducing a barrier and file write to avoid data corruption
+call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+if(mype==0)then
+   open(456,file='notify/gtc.notify',status='old')
+   read(456,101)notify
+   if(notify==1)then
+     write(stdout,*)'preparing to terminate...'
+     close(456)
+     call EXIT(1)
+   endif
+  close(456)
+endif
 
 101 format(i6)
 102 format(e12.6)
