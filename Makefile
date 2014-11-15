@@ -319,5 +319,6 @@ restartclean:
 	rm -f PHI*.ncd
 	rm -f NCD*
 	rm -f histry*.bak
-	rm -f RUNdimen.ncdrm -f nvm.lck*
+	rm -f RUNdimen.ncdrm 
+	rm -f nvm.lck*
 	rm -f /mnt/ramdisk/*

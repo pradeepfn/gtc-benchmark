@@ -1,13 +1,13 @@
 #!/bin/bash
 
-NUM_PROCESS=3
-SLEEP_TIME=10
+NUM_PROCESS=8
+SLEEP_TIME=20
 IPC_FILE="notify/gtc.notify"
 
 function start_gtc() {
 	cp gtc.input.orig gtc.input
 	#mpirun -n $NUM_PROCESS ./gtc > gtc.log 2>&1  &
-	mpirun -n $NUM_PROCESS ./gtc &
+	mpirun -n $NUM_PROCESS -hostfile host_file ./gtc &
 	pid=$!
 	sleep $SLEEP_TIME
 }
@@ -18,7 +18,7 @@ function restart_gtc(){
 	cp history_restart.out history.out
 	cp sheareb_restart.out sheareb.out
 	#mpirun -n $NUM_PROCESS ./gtc >> gtc.log 2>&1  &
-	mpirun -n $NUM_PROCESS ./gtc &
+	mpirun -n $NUM_PROCESS -hostfile host_file ./gtc &
 	pid=$!
 	sleep $SLEEP_TIME
 }
