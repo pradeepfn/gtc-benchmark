@@ -1,13 +1,13 @@
 #!/bin/bash
 
 NUM_PROCESS=8
-SLEEP_TIME=20
+SLEEP_TIME=120
 IPC_FILE="notify/gtc.notify"
 
 function start_gtc() {
 	cp gtc.input.orig gtc.input
-	#mpirun -n $NUM_PROCESS ./gtc > gtc.log 2>&1  &
-	mpirun -n $NUM_PROCESS -hostfile host_file ./gtc &
+	mpiexec -n $NUM_PROCESS -hostfile host_file ./gtc > gtc.log 2>&1  &
+	#mpiexec -n $NUM_PROCESS -hostfile host_file ./gtc &
 	pid=$!
 	sleep $SLEEP_TIME
 }
@@ -16,15 +16,16 @@ function restart_gtc(){
 	echo "restarting gtc..."
 	sed -i "s/irun=0/irun=1/" gtc.input
 	cp history_restart.out history.out
-	cp sheareb_restart.out sheareb.out
-	#mpirun -n $NUM_PROCESS ./gtc >> gtc.log 2>&1  &
-	mpirun -n $NUM_PROCESS -hostfile host_file ./gtc &
+	#cp sheareb_restart.out sheareb.out
+	mpiexec -n $NUM_PROCESS -hostfile host_file ./gtc >> gtc.log 2>&1  &
+	#mpiexec -n $NUM_PROCESS -hostfile host_file ./gtc &
 	pid=$!
 	sleep $SLEEP_TIME
 }
 
 function kill_gtc(){
     #setting the flag on shared file
+    echo "sending kill command..."
     echo 1 >| $IPC_FILE
     LTIME=`stat -c %X $IPC_FILE`
     while true    

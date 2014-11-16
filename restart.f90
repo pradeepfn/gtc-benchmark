@@ -108,22 +108,7 @@ subroutine restart_write
      enddo
      close(777)
 
-   ! Now do sheareb.out
-     open(777,file='sheareb_restart.out',status='replace')
-     if(istep==mstep)open(444,file='sheareb.out',status='old')
-     rewind(444)
-     read(444,101)j
-     write(777,101)j
-     read(444,101)mflx
-     write(777,101)mflx
-
-     do i=1,mpsi*noutputs*j
-        read(444,102)dum
-        write(777,102)dum
-      enddo
-     close(777)
-     if(istep==mstep)close(444)
-  endif
+    endif
 
 !we are introducing a barrier and file write to avoid data corruption
 call MPI_BARRIER(MPI_COMM_WORLD,ierr)

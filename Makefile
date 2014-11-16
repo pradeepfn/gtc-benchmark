@@ -322,3 +322,4 @@ restartclean:
 	rm -f RUNdimen.ncdrm 
 	rm -f nvm.lck*
 	rm -f /mnt/ramdisk/*
+	rm -f stats/tot*
