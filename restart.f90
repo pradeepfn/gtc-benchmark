@@ -68,6 +68,7 @@ subroutine restart_write
 ! record particle information for future restart run
   write(222)istep+mstepall,mi,me,ntracer
   if(mype==0)write(222)etracer,ptracer
+
   call nvchkpt_all(mype);
 #else
   write(222)istep+mstepall,mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale
@@ -172,7 +173,6 @@ subroutine restart_read
 
 ! read particle information to restart previous run
 #ifdef _NVRAM_RESTART
-  print *, "reading checkpointed data..."
   read(333)restart_step,mi,me,ntracer
   if(mype==0)read(333)etracer,ptracer
 #else

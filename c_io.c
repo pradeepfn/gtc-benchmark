@@ -17,7 +17,7 @@
 #define FILE_PATH_ONE "/mnt/ramdisk/mmap.file.one"
 #define FILE_PATH_TWO "/mnt/ramdisk/mmap.file.two"
 //#define FILE_SIZE 600
-#define FILE_SIZE 1000000000
+#define FILE_SIZE 350000000
 #define MICROSEC 1000000
 pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
 memmap_t m[2];
@@ -422,13 +422,14 @@ void *nvread(char *var, int id){
 
 FILE *fp;
 int irun;
-void start_time_(int *processes, int *mype, int *mpsi, int *restart){
+int process_id;
+void start_time_(int *prefix,int *processes, int *mype, int *mpsi, int *restart){
 	irun=*restart;
+	process_id=*mype;
 	if(irun == 1){
 		char file_name[50];
-		snprintf(file_name,sizeof(file_name),"stats/nvram_n%d_p%d_mpsi%d.log",*processes,*mype,*mpsi);
-		fp=fopen(file_name,"w");
-		fprintf(fp,"bytes,micro_sec\n");
+		snprintf(file_name,sizeof(file_name),"stats/nvram%d_n%d_p%d_mpsi%d.log",*prefix,*processes,*mype,*mpsi);
+		fp=fopen(file_name,"a+");
 	}
 	gettimeofday(&t_start,NULL);
 	tot_rbytes =0;
@@ -452,7 +453,18 @@ void end_time_(){
 		fprintf(fp,"%lu,%lu\n",tot_rbytes,tot_etime);
 		fclose(fp);
 	}
-	printf("batch read (bytes : time ): ( %zd :  %zd ) \n",tot_rbytes, tot_etime);
+	if(process_id == 0){
+		printf("batch read (bytes : time ): ( %zd :  %zd ) \n",tot_rbytes, tot_etime);
+	}
+}
+
+void end_time_chk_(){
+	gettimeofday(&t_end,NULL);
+	tot_etime+=get_elapsed_time(&t_end,&t_start);
+	if(irun == 1){//write upon valid data reads
+		fprintf(fp,"%lu\n",tot_etime);
+		fclose(fp);
+	}
 }
 
 void start_timestamp_(int *processes, int *mype, int *mpsi, int *restart){

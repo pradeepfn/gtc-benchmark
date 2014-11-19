@@ -126,7 +126,7 @@ program gtc
 
      	if(idiag==0)then
            CALL DIAGNOSIS
-           call DATAOUT3D
+           !call DATAOUT3D
         !!!  CALL VOLUME    !Original netCDF 3D potential data
         !  CALL OUTPUT3D  !HDF5 parallel output of 3D potential data
         !!!  CALL DATAOUT   !New version of netCDF 3D potential data

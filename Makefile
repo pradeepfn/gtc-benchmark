@@ -323,3 +323,4 @@ restartclean:
 	rm -f nvm.lck*
 	rm -f /mnt/ramdisk/*
 	rm -f stats/tot*
+	rm -f stats/nvram*
