@@ -17,7 +17,7 @@
 #define FILE_PATH_ONE "/mnt/ramdisk/mmap.file.one"
 #define FILE_PATH_TWO "/mnt/ramdisk/mmap.file.two"
 //#define FILE_SIZE 600
-#define FILE_SIZE 130000000
+#define FILE_SIZE 500000000
 #define MICROSEC 1000000
 pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
 memmap_t m[2];
