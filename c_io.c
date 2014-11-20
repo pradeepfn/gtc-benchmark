@@ -17,7 +17,7 @@
 #define FILE_PATH_ONE "/mnt/ramdisk/mmap.file.one"
 #define FILE_PATH_TWO "/mnt/ramdisk/mmap.file.two"
 //#define FILE_SIZE 600
-#define FILE_SIZE 600000000
+#define FILE_SIZE 130000000
 #define MICROSEC 1000000
 pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
 memmap_t m[2];
@@ -258,9 +258,8 @@ int is_remaining_space_enough(int process_id){
 	}	
     tot_chkpt_size = tot_size;	
 	if(tot_size > (FILE_SIZE - sizeof(headmeta_t))){
-#ifdef DEBUG
+		// the program wont work at all. 
 		printf("allocated buffer is not sufficient for program exec\n");
-#endif
 		assert(0);
 	}
 	size_t remain_size = FILE_SIZE - (sizeof(headmeta_t) + current->head->offset+1); //adding 1 since offset can be -1
@@ -269,7 +268,7 @@ int is_remaining_space_enough(int process_id){
 
 
  void chkpt_all(int process_id){
-	printf("checkpointing...\n");
+	//printf("checkpointing...\n");
 	//pthread_mutex_lock(&mtx);
 	struct timeval t1;
 	struct timeval t2;

@@ -1,59 +1,9 @@
-############################################################################
-#             Makefile to build the GTC code
-#           ==================================
-#
-# You only need to type "gmake" to build the code on the platforms
-# defined below. The makefile runs the "uname -s" command to detect
-# the operating system automatically. By default, this makefile
-# uses OPENMP=y, 64bits=y, and ESSL=y, which are the settings for
-# most runs on the IBM SP (AIX operating system). The executable will
-# then be called "gtc". On platforms without OpenMP support or if
-# OPENMP=n, the executable is called "gtcmpi".
-#
-# Other options are:
-#
-#  % gmake OPENMP=y       Builds the code with OpenMP support
-#  % gmake OPENMP=n       Builds the code WITHOUT OpenMP support
-#
-#  % gmake DOUBLE_PRECISION=y  Builds with 8-byte floating point precision
-#
-#  % gmake DEBUG=y        Compiles the files with debug option (-g)
-#                         The default is no debug option
-#
-#  % gmake ESSL=y         On AIX, uses the FFT routine from ESSL library
-#  % gmake ESSL=n         On AIX, uses the FFT routine from the NAG library
-#                         The default is to use the NAG library routines
-#                         on all other platforms
-#
-#  % gmake 64BITS=y       To compile a 64-bit version on AIX
-#  % gmake 64BITS=n       To compile a 32-bit version on AIX
-#                         The default is 32 bits on Linux clusters
-#
-#  % gmake PGI=y          Use the PGI compiler (pgf90) on Linux. The default
-#                         is to use the Lahey-Fujitsu compiler lf95.
-#
-#  % gmake ALTIX=y        Compiles with Intel compilers on the Altix
-#                         using ifort ... -lmpi
-#
-# You can combine more than one option on the command line:
-#
-#  % gmake OPENMP=y ESSL=y
-#
-# Special targets:
-#
-#  % gmake clean      Removes the executable and all object files (*.o)
-#
-#  % gmake cleanomp   Removes the executable and the object files
-#                     containing OpenMP directives
-#
-#  % gmake doc        Rebuilds the documentation.
-#
-#############################################################################
+
 64BITS=y
 XT3=y
 
 #DFLAG= -g -DDEBUG
-DFLAG= -D_NVRAM -D_NVRAM_RESTART
+DFLAG= -g -D_NVRAM -D_NVRAM_RESTART
 
 # Default names of some platform-dependent files
 SETUP:=setup.o
@@ -321,6 +271,6 @@ restartclean:
 	rm -f histry*.bak
 	rm -f RUNdimen.ncdrm 
 	rm -f nvm.lck*
-	rm -f /mnt/ramdisk/*
+	rm -f /mnt/ramdisk/mmap.file.*
 	rm -f stats/tot*
 	rm -f stats/nvram*
