@@ -17,7 +17,7 @@
 #define FILE_PATH_ONE "/mnt/ramdisk/mmap.file.one"
 #define FILE_PATH_TWO "/mnt/ramdisk/mmap.file.two"
 //#define FILE_SIZE 600
-#define FILE_SIZE 350000000
+#define FILE_SIZE 600000000
 #define MICROSEC 1000000
 pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
 memmap_t m[2];
@@ -159,8 +159,10 @@ memmap_t *get_latest_mapfile(memmap_t *m1,memmap_t *m2){
 }
 
 int myinitialized = 0;
+long total_data_size=0;
 void *alloc(size_t size, char *var_name, int process_id, size_t commit_size){
-    pthread_mutex_lock(&mtx);
+     total_data_size += size; 
+    //pthread_mutex_lock(&mtx);
     //init calls happens once
     if(!myinitialized){
         init(process_id);
@@ -189,7 +191,7 @@ void *alloc(size_t size, char *var_name, int process_id, size_t commit_size){
     n->process_id = process_id;
     n->version = 0;
     LIST_INSERT_HEAD(&head, n, entries);
-    pthread_mutex_unlock(&mtx);
+    //pthread_mutex_unlock(&mtx);
     return n->ptr;
 
 }
@@ -267,7 +269,8 @@ int is_remaining_space_enough(int process_id){
 
 
  void chkpt_all(int process_id){
-	pthread_mutex_lock(&mtx);
+	printf("checkpointing...\n");
+	//pthread_mutex_lock(&mtx);
 	struct timeval t1;
 	struct timeval t2;
 	gettimeofday(&t1,NULL);
@@ -295,7 +298,7 @@ int is_remaining_space_enough(int process_id){
 	}	
 	gettimeofday(&t2,NULL);
 	//printf("time checkpoint: (%zd,%zd) \n",tot_chkpt_size, get_elapsed_time(&t2,&t1));
-	pthread_mutex_unlock(&mtx);
+	//pthread_mutex_unlock(&mtx);
 	return;
 }
 
@@ -455,17 +458,11 @@ void end_time_(){
 	}
 	if(process_id == 0){
 		printf("batch read (bytes : time ): ( %zd :  %zd ) \n",tot_rbytes, tot_etime);
+	        printf("total checkpoint data : %lu\n",total_data_size);
 	}
 }
 
-void end_time_chk_(){
-	gettimeofday(&t_end,NULL);
-	tot_etime+=get_elapsed_time(&t_end,&t_start);
-	if(irun == 1){//write upon valid data reads
-		fprintf(fp,"%lu\n",tot_etime);
-		fclose(fp);
-	}
-}
+
 
 void start_timestamp_(int *processes, int *mype, int *mpsi, int *restart){
 		char file_name[50];
