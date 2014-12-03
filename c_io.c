@@ -11,7 +11,9 @@
 #include <unistd.h>
 #include <assert.h>
 #include <pthread.h>
+
 #include "mycheckpoint.h"
+#include "util.h"
 
 
 #define FILE_PATH_ONE "/mnt/ramdisk/mmap.file.one"
@@ -180,7 +182,7 @@ void *alloc(size_t size, char *var_name, int process_id, size_t commit_size){
 #endif
 		n->ptr = malloc(size); // allocating memory for incoming request
 	}
-    n->size = size;
+    	n->size = size;
 	//memcopying the variable names. otherwise
 	memcpy(n->var_name,var_name,VAR_SIZE);
 #ifdef DEBUG
@@ -342,7 +344,7 @@ void checkpoint1(void *start_addr, checkpoint_t *chkpt, void *data){
 	memcpy(start_addr,chkpt,sizeof(checkpoint_t));
 	//copy the actual value after metadata.
 	void *data_offset = ((char *)start_addr)+sizeof(checkpoint_t); 
-	memcpy(data_offset,data,chkpt->data_size);
+	memcpy_write(data_offset,data,chkpt->data_size);
 	//directly operating on the mapped memory
 	current->head->offset = chkpt->offset;
 	return;
@@ -415,7 +417,7 @@ void *nvread(char *var, int id){
     int i;
     buffer = malloc(checkpoint->data_size);
     //copying the memory back from checkpointed block   
-    memcpy(buffer,data_addr,checkpoint->data_size);
+    memcpy_read(buffer,data_addr,checkpoint->data_size);
 	//gettimeofday(&t2,NULL);
 	//printf("nvread (bytes : time): (%zd,%zd) \n",checkpoint->data_size, get_elapsed_time(&t2,&t1));
 	tot_rbytes += checkpoint->data_size;
