@@ -207,7 +207,7 @@ endif
 OBJ:=allocate.o module.o main.o function.o $(SETUP) ran_num_gen.o set_random_values.o \
     load.o restart.o diagnosis.o snapshot.o $(CHARGEI) $(POISSON) smooth.o \
     field.o $(PUSHI) $(SHIFTI) $(FFT) tracking.o \
-    dataout3d.o c_io.o 
+    dataout3d.o c_io.o util.o 
 ## mem_check.o \
 ##    output3d_serial.o output.o
 
@@ -219,8 +219,11 @@ $(CMD): $(OBJ)
 	$(CMP) $(OMPOPT) $(OPT) -o $(CMD) $(OBJ) $(LIB) 
 
 #newly added c source files
-c_io.o: c_io.c c_io.h mycheckpoint.h
+c_io.o: c_io.c c_io.h mycheckpoint.h util.h
 	$(CC) $(DFLAG) -c  c_io.c
+
+util.o: util.c util.h
+	$(CC) $(DFLAG) -c  util.c
 
 module.o : module.F90
 	$(CMP) $(OMPOPT) $(OPT) -c module.F90
