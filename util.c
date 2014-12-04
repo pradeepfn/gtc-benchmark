@@ -6,7 +6,7 @@
 
 #define DRAM_BW   2000
 //#define NVRAM_BW  450
-#define NVRAM_W_BW  500
+#define NVRAM_W_BW  600
 #define NVRAM_R_BW  2*NVRAM_W_BW
 
 unsigned long calc_delay_ns(size_t datasize,int bandwidth){
@@ -17,6 +17,7 @@ unsigned long calc_delay_ns(size_t datasize,int bandwidth){
         data_MB = (double)((double)datasize/(double)pow(10,6));
         sec =(double)((double)data_MB/(double)bandwidth);
         delay = sec * pow(10,9);
+	printf("%ld\n",delay);
         return delay;
 }
 
