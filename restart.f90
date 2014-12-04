@@ -22,12 +22,20 @@ subroutine restart_write
   use diagnosis_array
   implicit none
 
+  interface
+     function fsync (fd) bind(c,name="fsync")
+     use iso_c_binding, only: c_int
+     integer(c_int), value :: fd
+     integer(c_int) :: fsync
+     end function fsync
+  end interface
+
   character(len=18) cdum
   character(len=10) restart_dir
   character(len=60) file_name
   real(wp) dum
   integer i,j,mquantity,mflx,n_mode,mstepfinal,noutputs,notify
-  integer save_restart_files,ierr
+  integer save_restart_files,ierr,ret
 
   !save_restart_files=1
   save_restart_files=0
@@ -62,6 +70,7 @@ subroutine restart_write
      file_name=trim(restart_dir)//'/'//trim(cdum)
      open(222,file=file_name,status='replace',form='unformatted')
   else
+     call MPI_BARRIER(MPI_COMM_WORLD,ierr)
      open(222,file=cdum,status='replace',form='unformatted')
   endif
 #ifdef _NVRAM_RESTART
@@ -78,6 +87,9 @@ subroutine restart_write
 #endif
 !_NVRAM
 
+  flush(222)
+  ret = fsync(fnum(222))
+  if (ret /= 0) stop "Error calling FSYNC"
   close(222)
 
 #ifdef DEBUG
