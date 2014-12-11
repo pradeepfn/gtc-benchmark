@@ -340,18 +340,11 @@ void checkpoint2(void *base_addr, char *var_name, int process_id, int version, s
 void checkpoint1(void *start_addr, checkpoint_t *chkpt, void *data){ 
 	//copy the metadata 
 	memcpy(start_addr,chkpt,sizeof(checkpoint_t));
-	msync(start_addr,sizeof(checkpoint_t),MS_SYNC);
 	//copy the actual value after metadata.
 	void *data_offset = ((char *)start_addr)+sizeof(checkpoint_t); 
 	memcpy_write(data_offset,data,chkpt->data_size);
-	if(msync(data_offset,chkpt->data_size,MS_SYNC) == -1){
-		perror("error while msync\n");
-	}
 	//directly operating on the mapped memory TODO: operate on entire checkpoint data at once..
 	current->head->offset = chkpt->offset;
-	if(msync(current->head, sizeof(headmeta_t), MS_SYNC) == -1){
-		perror("error while sync\n");
-	}
 	return;
 }        
 

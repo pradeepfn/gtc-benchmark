@@ -40,17 +40,21 @@ int msleep(unsigned long nanosec)
 
 
 int memcpy_read(void *dest, void *src, size_t len) {
+#ifdef DELAY
     unsigned long lat_ns;
     lat_ns = calc_delay_ns(len,NVRAM_R_BW);
     msleep(lat_ns);
+#endif
     memcpy(dest,src,len);
     return 0;
 }
 
 int memcpy_write(void *dest, void *src, size_t len) {
+#ifdef DELAY
     unsigned long lat_ns;
     lat_ns = calc_delay_ns(len,NVRAM_W_BW);
     msleep(lat_ns);
+#endif
     memcpy(dest,src,len);
     return 0;
 }
