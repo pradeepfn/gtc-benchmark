@@ -19,7 +19,7 @@
 #define FILE_PATH_ONE "/mnt/ramdisk/mmap.file.one"
 #define FILE_PATH_TWO "/mnt/ramdisk/mmap.file.two"
 //#define FILE_SIZE 600
-#define FILE_SIZE 5000000000
+#define FILE_SIZE 2500000000
 #define MICROSEC 1000000
 pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
 memmap_t m[2];
@@ -48,6 +48,11 @@ unsigned long tot_etime;
 unsigned long get_elapsed_time(struct timeval *end, struct timeval *start){
     unsigned long diff = (end->tv_sec - start->tv_sec)*MICROSEC + end->tv_usec - start->tv_usec;
     return diff; 
+}
+
+void print_head_data(headmeta_t *loghead){
+	printf("offset : %ld\n",loghead->offset);
+	printf("id : %d\n",loghead->id); 
 }
 
 void print_data(checkpoint_t *chkptr){
@@ -218,6 +223,9 @@ int is_chkpoint_present(int process_id, char *filename){
 extern checkpoint_t *get_latest_version(char *var_name, int process_id){
 	checkpoint_t *result;
 	memmap_t *other;
+#ifdef DEBUG
+	print_head_data(current->head);
+#endif
 	if((result = get_latest_version1(current, var_name, process_id)) == NULL){
 		//if result not found in the current mem map file, then switch the files
 		// and do search again
@@ -225,20 +233,26 @@ extern checkpoint_t *get_latest_version(char *var_name, int process_id){
 		printf("Not found in the current memory mapped file. Searching the other...\n");
 #endif
 		other = (current == &m[0])?&m[1]:&m[0];	
+#ifdef DEBUG
+		print_head_data(other->head);
+#endif
 		result = get_latest_version1(other, var_name, process_id);	
 	}
 	return result;	
 }
 
 checkpoint_t *get_latest_version1(memmap_t *mmap, char *var_name, int process_id){
-	int temp_offset = mmap->head->offset;
+	long temp_offset = mmap->head->offset;
 	int str_cmp;
+#ifdef DEBUG
+	print_head_data(mmap->head);
+#endif
 	while(temp_offset >= 0){
-	struct timeval t1;
-	struct timeval t2;
-	gettimeofday(&t1,NULL);
+		struct timeval t1;
+		struct timeval t2;
+		gettimeofday(&t1,NULL);
 		checkpoint_t *ptr = get_meta(mmap->meta,temp_offset);
-	gettimeofday(&t2,NULL);
+		gettimeofday(&t2,NULL);
 #ifdef DEBUG
 		printf("comparing values  process ids (%d, %d) - (%s, %s)\n",ptr->process_id, process_id,ptr->var_name,var_name);
 #endif
@@ -345,6 +359,9 @@ void checkpoint1(void *start_addr, checkpoint_t *chkpt, void *data){
 	memcpy_write(data_offset,data,chkpt->data_size);
 	//directly operating on the mapped memory TODO: operate on entire checkpoint data at once..
 	current->head->offset = chkpt->offset;
+#ifdef DEBUG
+	print_head_data(current->head);
+#endif
 	return;
 }        
 
@@ -412,7 +429,6 @@ void *nvread(char *var, int id){
 	print_data(checkpoint);
 #endif
     data_addr = get_data_addr(current->meta,checkpoint);
-    int i;
     buffer = malloc(checkpoint->data_size);
     //copying the memory back from checkpointed block   
     memcpy_read(buffer,data_addr,checkpoint->data_size);
