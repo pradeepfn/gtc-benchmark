@@ -11,15 +11,22 @@
 #include <unistd.h>
 #include <assert.h>
 #include <pthread.h>
-
 #include "mycheckpoint.h"
+#include <c_io.h>
 #include "util.h"
 
+#define _USENVMLIB
+#define _ENABLE_PROTECTION
+#ifdef _ENABLE_PROTECTION
+#include <signal.h>
+#include <checkpoint.h>
+#include <hash_maps.h>
+#endif
 
 #define FILE_PATH_ONE "/mnt/ramdisk/mmap.file.one"
 #define FILE_PATH_TWO "/mnt/ramdisk/mmap.file.two"
 //#define FILE_SIZE 600
-#define FILE_SIZE 500000000
+#define FILE_SIZE 2500000000
 #define MICROSEC 1000000
 pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
 memmap_t m[2];
@@ -160,11 +167,85 @@ memmap_t *get_latest_mapfile(memmap_t *m1,memmap_t *m2){
 	}
 }
 
+
+/*****************Memory protection code********************/
+#ifdef _ENABLE_PROTECTION
+
+static void
+handler(int sig, siginfo_t *si, void *unused)
+{
+	disable_protection(si->si_addr);
+}
+
+void install_handler()
+{
+	struct sigaction sa;
+	struct sched_param param;
+	sa.sa_flags = SA_SIGINFO;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_sigaction = handler;
+	if (sigaction(SIGSEGV, &sa, NULL) == -1)
+		handle_error("sigaction");
+}
+
+
+/*This function will set the protection
+ * for address that we wish to set.
+ * 1. Make sure that address is addedl to
+ * alloc_map when allocating
+ * 2. Also make sure the address is page-aligned
+ */
+int enable_protection(void *ptr, size_t size) {
+
+	/*set chunk_protection is defined in checkpoint.cc
+	 * PROT_READ indicates we want to handle
+	 * protection fault on a write operation
+	 */
+	enable_alloc_prot(ptr, size);
+	return 0;
+}
+
+
+/*This function will disable the protection
+ * for address that we wish to, provided the
+ * address is in some range of allocated address
+ * that was added to alloc_map
+  */
+int disable_protection(void *ptr) {
+
+	disable_alloc_prot(ptr);
+
+	return 0;
+}
+#endif //#ifdef _ENABLE_PROTECTION
+
+/*****************Memory protection code********************/
+
+
+void* alloc_if( size_t size, char *var, int id, size_t commit_size)
+{
+	void *ptr = NULL;
+#ifdef _USENVMLIB
+
+	ptr = p_c_nvalloc_(size, var, 0, id);
+
+	/*make sure to record the allocation to
+	 * a hash map for enabling/disabling
+	 * protection
+	 */
+	add_alloc_map(ptr, size);
+
+	return ptr;
+#else
+	return malloc(size);
+#endif
+}
+
+
 int myinitialized = 0;
 long total_data_size=0;
 void *alloc(size_t size, char *var_name, int process_id, size_t commit_size){
      total_data_size += size; 
-    //pthread_mutex_lock(&mtx);
     //init calls happens once
     if(!myinitialized){
         init(process_id);
@@ -180,7 +261,8 @@ void *alloc(size_t size, char *var_name, int process_id, size_t commit_size){
 #ifdef DEBUG
 		printf("allocating from the heap space\n");
 #endif
-		n->ptr = malloc(size); // allocating memory for incoming request
+		//all allocations should go to alloc_
+		n->ptr = alloc_if(size, var_name, process_id, commit_size); // allocating memory for incoming request
 	}
     	n->size = size;
 	//memcopying the variable names. otherwise
@@ -193,7 +275,6 @@ void *alloc(size_t size, char *var_name, int process_id, size_t commit_size){
     n->process_id = process_id;
     n->version = 0;
     LIST_INSERT_HEAD(&head, n, entries);
-    //pthread_mutex_unlock(&mtx);
     return n->ptr;
 
 }
@@ -260,8 +341,9 @@ int is_remaining_space_enough(int process_id){
 	}	
     tot_chkpt_size = tot_size;	
 	if(tot_size > (FILE_SIZE - sizeof(headmeta_t))){
-		// the program wont work at all. 
+#ifdef DEBUG
 		printf("allocated buffer is not sufficient for program exec\n");
+#endif
 		assert(0);
 	}
 	size_t remain_size = FILE_SIZE - (sizeof(headmeta_t) + current->head->offset+1); //adding 1 since offset can be -1
@@ -270,8 +352,6 @@ int is_remaining_space_enough(int process_id){
 
 
  void chkpt_all(int process_id){
-	//printf("checkpointing...\n");
-	//pthread_mutex_lock(&mtx);
 	struct timeval t1;
 	struct timeval t2;
 	gettimeofday(&t1,NULL);
@@ -298,8 +378,6 @@ int is_remaining_space_enough(int process_id){
 		}
 	}	
 	gettimeofday(&t2,NULL);
-	//printf("time checkpoint: (%zd,%zd) \n",tot_chkpt_size, get_elapsed_time(&t2,&t1));
-	//pthread_mutex_unlock(&mtx);
 	return;
 }
 
@@ -414,7 +492,6 @@ void *nvread(char *var, int id){
 	print_data(checkpoint);
 #endif
     data_addr = get_data_addr(current->meta,checkpoint);
-    int i;
     buffer = malloc(checkpoint->data_size);
     //copying the memory back from checkpointed block   
     memcpy_read(buffer,data_addr,checkpoint->data_size);
