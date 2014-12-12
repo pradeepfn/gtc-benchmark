@@ -243,7 +243,6 @@ void* alloc_if( size_t size, char *var, int id, size_t commit_size)
 
 
 int myinitialized = 0;
-long total_data_size=0;
 void *alloc(size_t size, char *var_name, int process_id, size_t commit_size){
      total_data_size += size; 
     //init calls happens once
