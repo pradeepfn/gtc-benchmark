@@ -11,7 +11,6 @@
 unsigned long calc_delay_ns(size_t datasize,int bandwidth){
         unsigned long delay;
         double data_MB, sec;
-        unsigned long nsec;
 
         data_MB = (double)((double)datasize/(double)pow(10,6));
         sec =(double)((double)data_MB/(double)bandwidth);

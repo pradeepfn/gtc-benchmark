@@ -31,8 +31,7 @@ remove them if you are doing testing. Invoking,
 make restartclean will do that for you.
 
 
-restart
-------------
+#restart
 
 
 1. irun in gtc.input should be set to 1
@@ -42,3 +41,10 @@ restart
 
 Convenience script >> restart_gtc.sh
 (replaces the above files and run gtc)
+
+
+
+#Running gtc in a cluster
+
+mpirun -n 2 -f host_file ./gtc
+

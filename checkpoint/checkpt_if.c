@@ -243,7 +243,7 @@ void* alloc_if( size_t size, char *var, int id, size_t commit_size)
 
 int myinitialized = 0;
 long total_data_size=0;
-void *alloc(size_t size, char *var_name, int process_id, size_t commit_size){
+void *alloc(char *var_name, size_t size, size_t commit_size,int process_id){
      total_data_size += size; 
     //init calls happens once
     if(!myinitialized){
@@ -453,15 +453,10 @@ int get_new_offset(offset_t offset, size_t data_size){
 	return temp; 
 }
 
-void* alloc_( unsigned int size, char *var, int id, int commit_size)
-{
-		//printf("allocating space : %d \n", size);
-		return malloc(size);
-}
 
 // allocates n bytes using the 
 void* my_alloc_(unsigned int* n, char *s, int *iid, int *cmtsize) {
-	return alloc(*n, s, *iid, *cmtsize); 
+	return alloc(s,*n,*cmtsize,*iid); 
 }
  
 void my_free_(char* arr) {

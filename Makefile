@@ -225,6 +225,9 @@ $(CMD): $(OBJ)
 checkpt_if.o: checkpoint/checkpt_if.c checkpoint/checkpt_if.h checkpoint/mycheckpoint.h
 	$(CC) $(CFLAG)  $(DFLAG) -g -Wall -c  checkpoint/checkpt_if.c
 
+util.o: checkpoint/util.c checkpoint/util.h
+	$(CC) $(CFLAG)  $(DFLAG) -g -Wall -c  checkpoint/util.c
+
 module.o : module.F90
 	$(CMP) $(OMPOPT) $(OPT) -c module.F90
 
