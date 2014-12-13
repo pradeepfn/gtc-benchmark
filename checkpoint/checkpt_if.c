@@ -353,7 +353,7 @@ extern checkpoint_t *get_latest_version(char *var_name, int process_id){
 }
 
 checkpoint_t *get_latest_version1(memmap_t *mmap, char *var_name, int process_id){
-	int temp_offset = mmap->head->offset;
+	long temp_offset = mmap->head->offset;
 	int str_cmp;
 	while(temp_offset >= 0){
 		struct timeval t1;
