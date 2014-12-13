@@ -5,5 +5,5 @@ sed -i "s/irun=0/irun=1/" gtc.input
 cp history_restart.out history.out
 #cp sheareb_restart.out sheareb.out
 #mpirun -n 48 -hostfile host_file ./gtc
-mpirun -n 2 ./gtc
+mpirun -n 8 -hostfile host_file ./gtc
 
