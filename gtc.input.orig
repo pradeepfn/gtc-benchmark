@@ -10,7 +10,7 @@
   tstep=0.1,
   micell=2,
   mecell=2,
-  mpsi=2500, 
+  mpsi=10, 
   mthetamax=640,
   mzetamax=64,
   npartdom=1,

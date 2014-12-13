@@ -5,8 +5,11 @@ XT3=y
 #DFLAG= -g -DDEBUG
 DFLAG= -g -D_NVRAM -D_NVRAM_RESTART
 
-CFLAG= -I/home/pradeep/nvmchkpt/include
-LDFLAG=-L/home/pradeep/nvmchkpt/lib
+#CFLAG= -I/home/pradeep/nvmchkpt/include
+#LDFLAG=-L/home/pradeep/nvmchkpt/lib
+CFLAG= -I/usr/include
+LDFLAG=-L/usr/lib
+
 
 # Default names of some platform-dependent files
 SETUP:=setup.o
