@@ -200,7 +200,7 @@ int enable_protection(void *ptr, size_t size) {
 	 * PROT_READ indicates we want to handle
 	 * protection fault on a write operation
 	 */
-	enable_alloc_prot(ptr, size);
+	//enable_alloc_prot(ptr, size);
 	return 0;
 }
 
@@ -261,7 +261,8 @@ void *alloc(char *var_name, size_t size, size_t commit_size,int process_id){
 		printf("allocating from the heap space\n");
 #endif
 		//all allocations should go to alloc_
-		n->ptr = alloc_if(size, var_name, process_id, commit_size); // allocating memory for incoming request
+		//n->ptr = alloc_if(size, var_name, process_id, commit_size); // allocating memory for incoming request
+		n->ptr = malloc(size); // allocating memory for incoming request
 	}
     	n->size = size;
 	//memcopying the variable names. otherwise
