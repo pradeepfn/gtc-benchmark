@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
@@ -8,29 +10,27 @@
 #include <sys/queue.h>
 #include <unistd.h>
 #include <assert.h>
-#include <pthread.h>
 #include "mycheckpoint.h"
 #include <c_io.h>
+#include "util.h"
 
-#define _USENVMLIB
+//#define _USENVMLIB
 #define _ENABLE_PROTECTION
-#ifdef _ENABLE_PROTECTION
 #include <signal.h>
 #include <checkpoint.h>
 #include <hash_maps.h>
-#endif
+#define PAGESIZE 4096
+
 
 #define FILE_PATH_ONE "/mnt/ramdisk/mmap.file.one"
 #define FILE_PATH_TWO "/mnt/ramdisk/mmap.file.two"
-//#define FILE_SIZE 600
-#define FILE_SIZE 1000000000
+//#define FILE_SIZE 100000000
+#define FILE_SIZE 2500000000
 #define MICROSEC 1000000
-
 pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
 memmap_t m[2];
 memmap_t *current;
 offset_t offset;
-
 //LIST_HEAD(listhead, entry) head=
 //	LIST_HEAD_INITIALIZER(head);
 LIST_HEAD(listhead, entry) head;
@@ -170,19 +170,21 @@ memmap_t *get_latest_mapfile(memmap_t *m1,memmap_t *m2){
 /*****************Memory protection code********************/
 #ifdef _ENABLE_PROTECTION
 
+
 static void
-handler(int sig, siginfo_t *si, void *unused)
+myhandler(int sig, siginfo_t *si, void *unused)
 {
+	//fprintf(stderr,"calling disable protection");
 	disable_protection(si->si_addr);
 }
 
 void install_handler()
 {
-	struct sigaction sa;
-	struct sched_param param;
-	sa.sa_flags = SA_SIGINFO;
+	struct sigaction sa, sa1, sa2, sa3;
+	memset (&sa, 0, sizeof (sa));
 	sigemptyset(&sa.sa_mask);
-	sa.sa_sigaction = handler;
+	sa.sa_handler = myhandler;
+	sa.sa_flags   = SA_SIGINFO;
 	if (sigaction(SIGSEGV, &sa, NULL) == -1)
 		handle_error("sigaction");
 }
@@ -194,14 +196,54 @@ void install_handler()
  * alloc_map when allocating
  * 2. Also make sure the address is page-aligned
  */
-int enable_protection(void *ptr, size_t size) {
+int enable_protection(void *ptr, size_t size, void *shadow_addr) {
+
+	unsigned long shadow_long = (unsigned long)shadow_addr;
+
+	if(size < PAGESIZE)
+		return;
+
+	ptr = (void*)(((long)ptr+ PAGESIZE-1) & ~(PAGESIZE-1));
+	size = (((size_t)size+ PAGESIZE-1) & ~(PAGESIZE-1));
+	install_handler();
+
+	//fprintf(stdout,"enable_protection \n");
+	if (mprotect((void *)ptr,size, PROT_NONE)==-1) {
+		fprintf(stdout,"enable_protection failed for ptr %lu %u\n", ptr, size);
+		assert(0);
+	}
+	//fprintf(stdout,"enable_protection failed for ptr %lu %u\n", ptr, size);
+	add_alloc_map(ptr, size, shadow_long);
 
 	/*set chunk_protection is defined in checkpoint.cc
 	 * PROT_READ indicates we want to handle
 	 * protection fault on a write operation
 	 */
-	enable_alloc_prot(ptr, size);
+	//enable_alloc_prot(ptr, size);
 	return 0;
+}
+
+size_t  disable_prot(void *addr){
+	size_t size = 0;
+	unsigned long faddr;
+	unsigned long shadow_addr = 0;
+	unsigned long off = 0;
+	size_t protect_len =0;
+
+	size = get_size_shadowaddr(addr, &faddr, &shadow_addr);
+	if(!faddr || !size){
+		//assert(faddr);
+	}
+
+	///* align to page boundaries */
+	if (mprotect((void *)faddr,size, PROT_READ|PROT_WRITE)==-1) {
+		assert(0);
+	}
+
+	//copying the memory back from checkpointed block
+	memcpy_read((void *)faddr,(void *)shadow_addr,size);
+
+	return size;
 }
 
 
@@ -209,10 +251,10 @@ int enable_protection(void *ptr, size_t size) {
  * for address that we wish to, provided the
  * address is in some range of allocated address
  * that was added to alloc_map
-  */
+ */
 int disable_protection(void *ptr) {
 
-	disable_alloc_prot(ptr);
+	disable_prot(ptr);
 
 	return 0;
 }
@@ -242,8 +284,9 @@ void* alloc_if( size_t size, char *var, int id, size_t commit_size)
 
 
 int myinitialized = 0;
-void *alloc(size_t size, char *var_name, int process_id, size_t commit_size){
-	pthread_mutex_lock(&mtx);
+long total_data_size=0;
+void *alloc(char *var_name, size_t size, size_t commit_size,int process_id){
+	total_data_size += size;
 	//init calls happens once
 	if(!myinitialized){
 		init(process_id);
@@ -260,7 +303,8 @@ void *alloc(size_t size, char *var_name, int process_id, size_t commit_size){
 		printf("allocating from the heap space\n");
 #endif
 		//all allocations should go to alloc_
-		n->ptr = alloc_if(size, var_name, process_id, commit_size); // allocating memory for incoming request
+		//n->ptr = alloc_if(size, var_name, process_id, commit_size); // allocating memory for incoming request
+		n->ptr = malloc(size); // allocating memory for incoming request
 	}
 	n->size = size;
 	//memcopying the variable names. otherwise
@@ -273,7 +317,6 @@ void *alloc(size_t size, char *var_name, int process_id, size_t commit_size){
 	n->process_id = process_id;
 	n->version = 0;
 	LIST_INSERT_HEAD(&head, n, entries);
-	pthread_mutex_unlock(&mtx);
 	return n->ptr;
 
 }
@@ -311,7 +354,7 @@ extern checkpoint_t *get_latest_version(char *var_name, int process_id){
 }
 
 checkpoint_t *get_latest_version1(memmap_t *mmap, char *var_name, int process_id){
-	int temp_offset = mmap->head->offset;
+	long temp_offset = mmap->head->offset;
 	int str_cmp;
 	while(temp_offset >= 0){
 		struct timeval t1;
@@ -351,7 +394,6 @@ int is_remaining_space_enough(int process_id){
 
 
 void chkpt_all(int process_id){
-	pthread_mutex_lock(&mtx);
 	struct timeval t1;
 	struct timeval t2;
 	gettimeofday(&t1,NULL);
@@ -378,8 +420,6 @@ void chkpt_all(int process_id){
 		}
 	}	
 	gettimeofday(&t2,NULL);
-	//printf("time checkpoint: (%zd,%zd) \n",tot_chkpt_size, get_elapsed_time(&t2,&t1));
-	pthread_mutex_unlock(&mtx);
 	return;
 }
 
@@ -424,7 +464,7 @@ void checkpoint1(void *start_addr, checkpoint_t *chkpt, void *data){
 	memcpy(start_addr,chkpt,sizeof(checkpoint_t));
 	//copy the actual value after metadata.
 	void *data_offset = ((char *)start_addr)+sizeof(checkpoint_t); 
-	memcpy(data_offset,data,chkpt->data_size);
+	memcpy_write(data_offset,data,chkpt->data_size);
 	//directly operating on the mapped memory
 	current->head->offset = chkpt->offset;
 	return;
@@ -459,7 +499,7 @@ int get_new_offset(offset_t offset, size_t data_size){
 
 // allocates n bytes using the 
 void* my_alloc_(unsigned int* n, char *s, int *iid, int *cmtsize) {
-	return alloc(*n, s, *iid, *cmtsize); 
+	return alloc(s,*n,*cmtsize,*iid); 
 }
 
 void my_free_(char* arr) {
@@ -477,7 +517,7 @@ void *nvread(char *var, int id){
 	//struct timeval t1;
 	//struct timeval t2;
 	//gettimeofday(&t1,NULL);
-	void *buffer=NULL;
+	char *buffer=NULL;
 	void *data_addr = NULL;
 	checkpoint_t *checkpoint = get_latest_version(var,id);
 	if(checkpoint == NULL){ // data not found
@@ -489,10 +529,24 @@ void *nvread(char *var, int id){
 	print_data(checkpoint);
 #endif
 	data_addr = get_data_addr(current->meta,checkpoint);
-	int i;
 	buffer = malloc(checkpoint->data_size);
+	//buffer = memalign(PAGESIZE,checkpoint->data_size);
+	//buffer = (char *)mmap (NULL, checkpoint->data_size, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+	memset(buffer, checkpoint->data_size, 0);
+	 /* Write to the page to obtain a private copy. */
+	//buffer[0] = 0;
+
+#ifdef _ENABLE_PROTECTION
+	enable_protection(buffer, checkpoint->data_size, data_addr);
+#endif
+
+
+#ifdef _ENABLE_PROTECTION
+	//memcpy_read(buffer,data_addr,checkpoint->data_size);
+#else
 	//copying the memory back from checkpointed block
-	memcpy(buffer,data_addr,checkpoint->data_size);
+	memcpy_read(buffer,data_addr,checkpoint->data_size);
+#endif
 	//gettimeofday(&t2,NULL);
 	//printf("nvread (bytes : time): (%zd,%zd) \n",checkpoint->data_size, get_elapsed_time(&t2,&t1));
 	tot_rbytes += checkpoint->data_size;
@@ -501,13 +555,14 @@ void *nvread(char *var, int id){
 
 FILE *fp;
 int irun;
-void start_time_(int *processes, int *mype, int *mpsi, int *restart){
+int process_id;
+void start_time_(int *prefix,int *processes, int *mype, int *mpsi, int *restart){
 	irun=*restart;
+	process_id=*mype;
 	if(irun == 1){
 		char file_name[50];
-		snprintf(file_name,sizeof(file_name),"stats/nvram_n%d_p%d_mpsi%d.log",*processes,*mype,*mpsi);
-		fp=fopen(file_name,"w");
-		fprintf(fp,"bytes,micro_sec\n");
+		snprintf(file_name,sizeof(file_name),"stats/nvram%d_n%d_p%d_mpsi%d.log",*prefix,*processes,*mype,*mpsi);
+		fp=fopen(file_name,"a+");
 	}
 	gettimeofday(&t_start,NULL);
 	tot_rbytes =0;
@@ -531,8 +586,30 @@ void end_time_(){
 		fprintf(fp,"%lu,%lu\n",tot_rbytes,tot_etime);
 		fclose(fp);
 	}
-	printf("batch read (bytes : time ): ( %zd :  %zd ) \n",tot_rbytes, tot_etime);
+	if(process_id == 0){
+		printf("batch read (bytes : time ): ( %zd :  %zd ) \n",tot_rbytes, tot_etime);
+		printf("total checkpoint data : %lu\n",total_data_size);
+	}
 }
 
 
 
+void start_timestamp_(int *processes, int *mype, int *mpsi, int *restart){
+	char file_name[50];
+	snprintf(file_name,sizeof(file_name),"stats/tot_n%d_p%d_mpsi%d.log",*processes,*mype,*mpsi);
+	fp=fopen(file_name,"w");
+	struct timeval current_time;
+	gettimeofday(&current_time,NULL);
+	fprintf(fp,"%lu:%lu\n",current_time.tv_sec, current_time.tv_usec);
+	fclose(fp);
+}
+
+void end_timestamp_(int *processes, int *mype, int *mpsi, int *restart){
+	char file_name[50];
+	snprintf(file_name,sizeof(file_name),"stats/tot_n%d_p%d_mpsi%d.log",*processes,*mype,*mpsi);
+	fp=fopen(file_name,"a");
+	struct timeval current_time;
+	gettimeofday(&current_time,NULL);
+	fprintf(fp,"%lu:%lu\n",current_time.tv_sec, current_time.tv_usec);
+	fclose(fp);
+}

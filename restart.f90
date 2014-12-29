@@ -22,12 +22,20 @@ subroutine restart_write
   use diagnosis_array
   implicit none
 
+  interface
+     function fsync (fd) bind(c,name="fsync")
+     use iso_c_binding, only: c_int
+     integer(c_int), value :: fd
+     integer(c_int) :: fsync
+     end function fsync
+  end interface
+
   character(len=18) cdum
   character(len=10) restart_dir
   character(len=60) file_name
   real(wp) dum
-  integer i,j,mquantity,mflx,n_mode,mstepfinal,noutputs
-  integer save_restart_files,ierr
+  integer i,j,mquantity,mflx,n_mode,mstepfinal,noutputs,notify
+  integer save_restart_files,ierr,ret
 
   !save_restart_files=1
   save_restart_files=0
@@ -62,12 +70,14 @@ subroutine restart_write
      file_name=trim(restart_dir)//'/'//trim(cdum)
      open(222,file=file_name,status='replace',form='unformatted')
   else
+     call MPI_BARRIER(MPI_COMM_WORLD,ierr)
      open(222,file=cdum,status='replace',form='unformatted')
   endif
 #ifdef _NVRAM_RESTART
 ! record particle information for future restart run
   write(222)istep+mstepall,mi,me,ntracer
   if(mype==0)write(222)etracer,ptracer
+
   call nvchkpt_all(mype);
 #else
   write(222)istep+mstepall,mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale
@@ -77,6 +87,9 @@ subroutine restart_write
 #endif
 !_NVRAM
 
+  flush(222)
+  ret = fsync(fnum(222))
+  if (ret /= 0) stop "Error calling FSYNC"
   close(222)
 
 #ifdef DEBUG
@@ -108,22 +121,20 @@ subroutine restart_write
      enddo
      close(777)
 
-   ! Now do sheareb.out
-     open(777,file='sheareb_restart.out',status='replace')
-     if(istep==mstep)open(444,file='sheareb.out',status='old')
-     rewind(444)
-     read(444,101)j
-     write(777,101)j
-     read(444,101)mflx
-     write(777,101)mflx
+    endif
 
-     do i=1,mpsi*noutputs*j
-        read(444,102)dum
-        write(777,102)dum
-      enddo
-     close(777)
-     if(istep==mstep)close(444)
-  endif
+!we are introducing a barrier and file write to avoid data corruption
+call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+if(mype==0)then
+   open(456,file='notify/gtc.notify',status='old')
+   read(456,101)notify
+   if(notify==1)then
+     write(stdout,*)'preparing to terminate...'
+     close(456)
+     call EXIT(1)
+   endif
+  close(456)
+endif
 
 101 format(i6)
 102 format(e12.6)
@@ -174,7 +185,6 @@ subroutine restart_read
 
 ! read particle information to restart previous run
 #ifdef _NVRAM_RESTART
-  print *, "reading checkpointed data..."
   read(333)restart_step,mi,me,ntracer
   if(mype==0)read(333)etracer,ptracer
 #else

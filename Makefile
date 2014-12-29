@@ -1,59 +1,15 @@
-############################################################################
-#             Makefile to build the GTC code
-#           ==================================
-#
-# You only need to type "gmake" to build the code on the platforms
-# defined below. The makefile runs the "uname -s" command to detect
-# the operating system automatically. By default, this makefile
-# uses OPENMP=y, 64bits=y, and ESSL=y, which are the settings for
-# most runs on the IBM SP (AIX operating system). The executable will
-# then be called "gtc". On platforms without OpenMP support or if
-# OPENMP=n, the executable is called "gtcmpi".
-#
-# Other options are:
-#
-#  % gmake OPENMP=y       Builds the code with OpenMP support
-#  % gmake OPENMP=n       Builds the code WITHOUT OpenMP support
-#
-#  % gmake DOUBLE_PRECISION=y  Builds with 8-byte floating point precision
-#
-#  % gmake DEBUG=y        Compiles the files with debug option (-g)
-#                         The default is no debug option
-#
-#  % gmake ESSL=y         On AIX, uses the FFT routine from ESSL library
-#  % gmake ESSL=n         On AIX, uses the FFT routine from the NAG library
-#                         The default is to use the NAG library routines
-#                         on all other platforms
-#
-#  % gmake 64BITS=y       To compile a 64-bit version on AIX
-#  % gmake 64BITS=n       To compile a 32-bit version on AIX
-#                         The default is 32 bits on Linux clusters
-#
-#  % gmake PGI=y          Use the PGI compiler (pgf90) on Linux. The default
-#                         is to use the Lahey-Fujitsu compiler lf95.
-#
-#  % gmake ALTIX=y        Compiles with Intel compilers on the Altix
-#                         using ifort ... -lmpi
-#
-# You can combine more than one option on the command line:
-#
-#  % gmake OPENMP=y ESSL=y
-#
-# Special targets:
-#
-#  % gmake clean      Removes the executable and all object files (*.o)
-#
-#  % gmake cleanomp   Removes the executable and the object files
-#                     containing OpenMP directives
-#
-#  % gmake doc        Rebuilds the documentation.
-#
-#############################################################################
+
 64BITS=y
 XT3=y
 
 #DFLAG= -g -DDEBUG
-DFLAG= -D_NVRAM -D_NVRAM_RESTART
+DFLAG= -g -D_NVRAM -D_NVRAM_RESTART -DDELAY -D_ENABLE_PROTECTION 
+
+#CFLAG= -I/home/pradeep/nvmchkpt/include
+#LDFLAG=-L/home/pradeep/nvmchkpt/lib
+CFLAG= -I/net/hu21/pfernand/nvmchkpt/include
+LDFLAG=-L/net/hu21/pfernand/nvmchkpt/lib
+
 
 # Default names of some platform-dependent files
 SETUP:=setup.o
@@ -157,7 +113,7 @@ ifeq ($(os),Linux)
  # YX add the following netcdf lib
     NETCDF := -lnetcdf -lnetcdff
     LIB := $(DFLAG) -cpp -L/usr/lib \
-               -I/usr/include $(NETCDF) -lnvmchkpt
+               -I/usr/include $(NETCDF) $(LDFLAG)  -lnvmchkpt
   ifeq ($(PGI),y)
     MPIMODULE:=/usr/pppl/pgi/5.2-1/mpich-1.2.6/include/f90base
     F90C:=pgf90
@@ -257,7 +213,7 @@ endif
 OBJ:=allocate.o module.o main.o function.o $(SETUP) ran_num_gen.o set_random_values.o \
     load.o restart.o diagnosis.o snapshot.o $(CHARGEI) $(POISSON) smooth.o \
     field.o $(PUSHI) $(SHIFTI) $(FFT) tracking.o \
-    dataout3d.o checkpt_if.o 
+    dataout3d.o checkpt_if.o util.o
 ## mem_check.o \
 ##    output3d_serial.o output.o
 
@@ -270,7 +226,10 @@ $(CMD): $(OBJ)
 
 #newly added c source files
 checkpt_if.o: checkpoint/checkpt_if.c checkpoint/checkpt_if.h checkpoint/mycheckpoint.h
-	$(CC) $(DFLAG) -c  checkpoint/checkpt_if.c
+	$(CC) $(CFLAG)  $(DFLAG) -g -Wall -c  checkpoint/checkpt_if.c
+
+util.o: checkpoint/util.c checkpoint/util.h
+	$(CC) $(CFLAG)  $(DFLAG) -g -Wall -c  checkpoint/util.c
 
 module.o : module.F90
 	$(CMP) $(OMPOPT) $(OPT) -c module.F90
@@ -306,11 +265,7 @@ PHI_dat_to_ncd: PHI_dat_to_ncd.f90
 
 clean:
 	rm -f $(CMD) $(OBJ) *.mod
-	rm -f snap*.out
-	rm -f PHI*.ncd
-	rm -f NCD*
-	rm -f histry*.bak
-	rm -f RUNdimen.ncd
+
 	rm -f gtc.input
 
 restartclean:
@@ -319,8 +274,12 @@ restartclean:
 	rm -f sheareb.out
 	rm -f sheareb_restart.out
 	rm -f DATA_RESTART*
-	rm -f nvm.lck*
-	rm -f PHI*
+	rm -f snap*.out
+	rm -f PHI*.ncd
 	rm -f NCD*
-	rm -f /mnt/ramdisk/*
-	rm -rf /mnt/pvm/*
+	rm -f histry*.bak
+	rm -f RUNdimen.ncdrm 
+	rm -f nvm.lck*
+	rm -f /mnt/ramdisk/mmap.file.*
+	rm -f stats/tot*
+	rm -f stats/nvram*

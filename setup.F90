@@ -42,6 +42,7 @@ end module particle_decomp
   
   !new variables
   CHARACTER(LEN=10) varname
+  CHARACTER(LEN=10) file_name
   integer cmtsize
 
 #ifdef __AIX
@@ -56,6 +57,11 @@ end module particle_decomp
 
 ! Read the input file that contains the run parameters
   call read_input_params(micell,mecell,r0,b0,temperature,edensity0)
+ 
+!!we take a time stamp on a file, on first start
+  if(irun == 0)then
+     call start_timestamp(numberpe,mype,mpsi,irun)
+  endif
 
 ! numerical constant
   pi=4.0_wp*atan(1.0_wp)
@@ -66,9 +72,9 @@ end module particle_decomp
   else
     call resume_step
     mstep=max(2,mstep-restart_step)
-    print *, "mstep,restart_step ", mstep, restart_step
+    !print *, "mstep,restart_step ", mstep, restart_step
   endif
-  print *, "mstep,restart_step ", mstep, restart_step
+  !print *, "mstep,restart_step ", mstep, restart_step
   msnap=min(msnap,mstep/ndiag)
   isnap=mstep/msnap
   idiag1=mpsi/2
@@ -100,7 +106,7 @@ end module particle_decomp
   endif
 !zonali, zonale, phip00, pfuxpsi, rdteme, rdtemi, phi, zion, zion0, zelectron, zelectron0, phisave
 #ifdef _NVRAM
-  call start_time(numberpe,mype,mpsi,irun)
+  call start_time(1,numberpe,mype,mpsi,irun)
   varname = "zonali"
   cmtsize = mpsi+1
   call alloc_1d_real(zonali,mpsi+1,varname, mype, cmtsize)

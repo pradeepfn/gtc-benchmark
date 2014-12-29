@@ -51,6 +51,7 @@ int get_new_offset(offset_t offset, size_t data_size);
 void mmap_files(memmap_t *m, const char *file_name);
 void copy_head_to_mem(memmap_t *m, int fileId);
 memmap_t *get_latest_mapfile(memmap_t *m1,memmap_t *m2);
+void *alloc(char *var_name, size_t size, size_t commit_size,int process_id);
 
 //#endif
 
