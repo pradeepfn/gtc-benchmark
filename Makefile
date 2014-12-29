@@ -3,10 +3,13 @@
 XT3=y
 
 #DFLAG= -g -DDEBUG
-DFLAG= -g -D_NVRAM -D_NVRAM_RESTART
+DFLAG= -g -D_NVRAM -D_NVRAM_RESTART -DDELAY -D_ENABLE_PROTECTION 
 
-CFLAG= -I/home/pradeep/nvmchkpt/include
-LDFLAG=-L/home/pradeep/nvmchkpt/lib
+#CFLAG= -I/home/pradeep/nvmchkpt/include
+#LDFLAG=-L/home/pradeep/nvmchkpt/lib
+CFLAG= -I/net/hu21/pfernand/nvmchkpt/include
+LDFLAG=-L/net/hu21/pfernand/nvmchkpt/lib
+
 
 # Default names of some platform-dependent files
 SETUP:=setup.o
