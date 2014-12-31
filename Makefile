@@ -3,12 +3,12 @@
 XT3=y
 
 #DFLAG= -g -DDEBUG
-DFLAG= -g -D_NVRAM -D_NVRAM_RESTART -DDELAY -D_ENABLE_PROTECTION 
+DFLAG= -g -D_NVRAM -D_NVRAM_RESTART -DDELAY 
 
 #CFLAG= -I/home/pradeep/nvmchkpt/include
 #LDFLAG=-L/home/pradeep/nvmchkpt/lib
-CFLAG= -I/net/hu21/pfernand/nvmchkpt/include
-LDFLAG=-L/net/hu21/pfernand/nvmchkpt/lib
+CFLAG= -I/home/pradeep/checkout/phoenix/include
+LDFLAG= -L/home/pradeep/checkout/phoenix/lib -lphoenix 
 
 
 # Default names of some platform-dependent files
@@ -113,7 +113,7 @@ ifeq ($(os),Linux)
  # YX add the following netcdf lib
     NETCDF := -lnetcdf -lnetcdff
     LIB := $(DFLAG) -cpp -L/usr/lib \
-               -I/usr/include $(NETCDF) $(LDFLAG)  -lnvmchkpt
+               -I/usr/include $(NETCDF) $(LDFLAG)
   ifeq ($(PGI),y)
     MPIMODULE:=/usr/pppl/pgi/5.2-1/mpich-1.2.6/include/f90base
     F90C:=pgf90
@@ -213,7 +213,7 @@ endif
 OBJ:=allocate.o module.o main.o function.o $(SETUP) ran_num_gen.o set_random_values.o \
     load.o restart.o diagnosis.o snapshot.o $(CHARGEI) $(POISSON) smooth.o \
     field.o $(PUSHI) $(SHIFTI) $(FFT) tracking.o \
-    dataout3d.o checkpt_if.o util.o
+    dataout3d.o
 ## mem_check.o \
 ##    output3d_serial.o output.o
 
@@ -223,13 +223,6 @@ CC=mpicc
 
 $(CMD): $(OBJ)
 	$(CMP) $(OMPOPT) $(OPT) -o $(CMD) $(OBJ) $(LIB) 
-
-#newly added c source files
-checkpt_if.o: checkpoint/checkpt_if.c checkpoint/checkpt_if.h checkpoint/mycheckpoint.h
-	$(CC) $(CFLAG)  $(DFLAG) -g -Wall -c  checkpoint/checkpt_if.c
-
-util.o: checkpoint/util.c checkpoint/util.h
-	$(CC) $(CFLAG)  $(DFLAG) -g -Wall -c  checkpoint/util.c
 
 module.o : module.F90
 	$(CMP) $(OMPOPT) $(OPT) -c module.F90

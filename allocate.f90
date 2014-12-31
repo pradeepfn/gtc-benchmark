@@ -1,12 +1,12 @@
 module Allocator
   use iso_c_binding
     interface
-    type(c_ptr) function my_alloc(s, varname, mype, cmtsize)
+    type(c_ptr) function alloc(s, varname, mype, cmtsize)
       use iso_c_binding
       integer :: s
       character(len=10) varname
       integer :: mype, cmtsize
-    end function my_alloc
+    end function alloc
     end interface
 
     contains
@@ -20,7 +20,7 @@ module Allocator
 
          val = row*SIZEOF(real)
         nvsize = cmtsize * SIZEOF(real)
-        cptr = my_alloc(val,varname, mype, nvsize)
+        cptr = alloc(val,varname, mype, nvsize)
         call c_f_pointer(cptr,arr,[row])
       end subroutine
 
@@ -35,7 +35,7 @@ module Allocator
 
          val = row*col*SIZEOF(real)
         nvsize = cmtsize * SIZEOF(real)
-        cptr = my_alloc(val,varname, mype, nvsize)
+        cptr = alloc(val,varname, mype, nvsize)
         call c_f_pointer(cptr,arr,[row,col])
       end subroutine
 
@@ -50,7 +50,7 @@ module Allocator
 
          val = row*col*SIZEOF(real)
         nvsize = cmtsize * SIZEOF(real)
-        cptr = my_alloc(val,varname, mype, nvsize)
+        cptr = alloc(val,varname, mype, nvsize)
         call c_f_pointer(cptr,arr,[row,col])
       end subroutine
 
@@ -67,7 +67,7 @@ module Allocator
 
         val = row*col* z*SIZEOF(real)
         nvsize = cmtsize * SIZEOF(real)
-        cptr = my_alloc(val,varname, mype, nvsize)
+        cptr = alloc(val,varname, mype, nvsize)
         call c_f_pointer(cptr,arr,[row,col,z])
       end subroutine
 
@@ -85,12 +85,12 @@ module Allocator
 
          nvsize = cmtsize * SIZEOF(real)
          val = row*col*z*SIZEOF(real)
-        cptr = my_alloc(val,varname, mype, nvsize)
+        cptr = alloc(val,varname, mype, nvsize)
         call c_f_pointer(cptr,arr,[row,col,z])
       end subroutine
 
       subroutine free_1d_real(arr)
         real, pointer :: arr(:)
-        call my_free(arr)
+        call afree(arr)
       end subroutine
 end module

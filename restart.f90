@@ -78,7 +78,7 @@ subroutine restart_write
   write(222)istep+mstepall,mi,me,ntracer
   if(mype==0)write(222)etracer,ptracer
 
-  call nvchkpt_all(mype);
+  call chkpt_all(mype);
 #else
   write(222)istep+mstepall,mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale
   if(mype==0)write(222)etracer,ptracer
