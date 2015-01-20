@@ -59,9 +59,7 @@ end module particle_decomp
   call read_input_params(micell,mecell,r0,b0,temperature,edensity0)
  
 !!we take a time stamp on a file, on first start
-  if(irun == 0)then
      call start_timestamp(numberpe,mype,mpsi,irun)
-  endif
 
 ! numerical constant
   pi=4.0_wp*atan(1.0_wp)

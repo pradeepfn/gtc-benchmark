@@ -276,3 +276,7 @@ restartclean:
 	rm -f /mnt/ramdisk/mmap.file.*
 	rm -f stats/tot*
 	rm -f stats/nvram*
+
+logclean:
+	rm -f stats/tot*
+	

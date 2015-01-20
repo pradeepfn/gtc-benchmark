@@ -50,6 +50,23 @@ subroutine restart_write
 !!  endif
 !!!!!!!!!!!!!************************
 
+
+if(irun == 1)then
+    call end_timestamp(numberpe,mype,mpsi,irun)
+endif
+
+! inserted a termination hook
+if(mype==0)then
+   open(456,file='notify/gtc.notify',status='old')
+   read(456,101)notify
+   if(notify==1)then
+     write(stdout,*)'preparing to terminate...'
+     close(456)
+     call EXIT(1)
+   endif
+  close(456)
+endif
+
   if(mype < 10)then
      write(cdum,'("DATA_RESTART.0000",i1)')mype
   elseif(mype < 100)then
@@ -125,16 +142,6 @@ subroutine restart_write
 
 !we are introducing a barrier and file write to avoid data corruption
 call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-if(mype==0)then
-   open(456,file='notify/gtc.notify',status='old')
-   read(456,101)notify
-   if(notify==1)then
-     write(stdout,*)'preparing to terminate...'
-     close(456)
-     call EXIT(1)
-   endif
-  close(456)
-endif
 
 101 format(i6)
 102 format(e12.6)
