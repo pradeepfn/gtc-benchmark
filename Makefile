@@ -7,8 +7,8 @@ DFLAG= -g -D_NVRAM -D_NVRAM_RESTART -DDELAY
 
 #CFLAG= -I/home/pradeep/nvmchkpt/include
 #LDFLAG=-L/home/pradeep/nvmchkpt/lib
-CFLAG= -I/home/pradeep/checkout/phoenix/include
-LDFLAG= -L/home/pradeep/checkout/phoenix/lib -lphoenix 
+CFLAG= -I/net/hu21/pfernand/phoenix/include
+LDFLAG= -L/net/hu21/pfernand/phoenix/lib -lphoenix 
 
 
 # Default names of some platform-dependent files
