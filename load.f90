@@ -31,6 +31,7 @@ subroutine load
 
 ! Initialize random number generator
   call rand_num_gen_init
+  call make_timestamp(numberpe,mype,mpsi,irun)
 
 ! restart from previous runs
   if(irun /= 0)then
