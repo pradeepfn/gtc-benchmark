@@ -27,13 +27,16 @@ for(filename in listfiles)
 	temp <- temp*1000000 + data$V2[3] - data$V2[2]
 	populate_status <- c(populate_status,temp)
 
-	temp <- data$V1[4]-data$V1[3]
-	temp <- temp*1000000 + data$V2[4] - data$V2[3]
-	compute <- c(compute,temp)
+	if(!is.na(data$V1[4])){
+		temp <- data$V1[4]-data$V1[3]
+		temp <- temp*1000000 + data$V2[4] - data$V2[3]
+		compute <- c(compute,temp)
+	}
 }
 
 print(mean(init_time))
 print(mean(populate_status))
+print(compute)
 print(mean(compute))
 setwd(initial.dir);
 
