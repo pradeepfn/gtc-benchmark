@@ -63,7 +63,7 @@ program gtc
 
 ! initialize particle position and velocity
   CALL LOAD
-  call make_timestamp(numberpe,mype,mpsi,irun)
+  call make_timestamp()
 ! Write out initial position of tracked particles
 !!!  if(track_particles==1)then
 !!!     call locate_tracked_particles
@@ -180,7 +180,7 @@ program gtc
 #endif
 
 ! we take the end timestamp
-call end_timestamp(numberpe,mype,mpsi,irun)
+call end_timestamp()
 
 
 ! MPI finalize

@@ -59,7 +59,7 @@ end module particle_decomp
   call read_input_params(micell,mecell,r0,b0,temperature,edensity0)
  
 !!we take a time stamp on a file, on first start
-     call start_timestamp(numberpe,mype,mpsi,irun)
+     call start_timestamp(mype)
 
 ! numerical constant
   pi=4.0_wp*atan(1.0_wp)
@@ -104,7 +104,7 @@ end module particle_decomp
   endif
 !zonali, zonale, phip00, pfuxpsi, rdteme, rdtemi, phi, zion, zion0, zelectron, zelectron0, phisave
 #ifdef _NVRAM
-  call start_time(1,numberpe,mype,mpsi,irun)
+  call start_time(mype)
   varname = "zonali"
   cmtsize = mpsi+1
   call alloc_1d_real(zonali,mpsi+1,varname, mype, cmtsize)

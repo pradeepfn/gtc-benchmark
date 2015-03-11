@@ -52,7 +52,7 @@ subroutine restart_write
 
 
 if(irun == 1)then
-    call end_timestamp(numberpe,mype,mpsi,irun)
+    call end_timestamp()
 endif
 
 ! inserted a termination hook

@@ -36,7 +36,6 @@ for(filename in listfiles)
 
 print(mean(init_time))
 print(mean(populate_status))
-print(compute)
 print(mean(compute))
 setwd(initial.dir);
 
