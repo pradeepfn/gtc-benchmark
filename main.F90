@@ -84,7 +84,7 @@ program gtc
         idiag=mod(irk+1,2)+mod(istep,ndiag)
 
 ! smooth potential, diagnostics
-        CALL SMOOTH(3)
+!        CALL SMOOTH(3)
         call timer(t0,dt,t0wc,dtwc)
         time(5)=time(5)+dt
         timewc(5)=timewc(5)+dtwc
