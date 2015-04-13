@@ -1,56 +1,15 @@
-############################################################################
-#             Makefile to build the GTC code
-#           ==================================
-#
-# You only need to type "gmake" to build the code on the platforms
-# defined below. The makefile runs the "uname -s" command to detect
-# the operating system automatically. By default, this makefile
-# uses OPENMP=y, 64bits=y, and ESSL=y, which are the settings for
-# most runs on the IBM SP (AIX operating system). The executable will
-# then be called "gtc". On platforms without OpenMP support or if
-# OPENMP=n, the executable is called "gtcmpi".
-#
-# Other options are:
-#
-#  % gmake OPENMP=y       Builds the code with OpenMP support
-#  % gmake OPENMP=n       Builds the code WITHOUT OpenMP support
-#
-#  % gmake DOUBLE_PRECISION=y  Builds with 8-byte floating point precision
-#
-#  % gmake DEBUG=y        Compiles the files with debug option (-g)
-#                         The default is no debug option
-#
-#  % gmake ESSL=y         On AIX, uses the FFT routine from ESSL library
-#  % gmake ESSL=n         On AIX, uses the FFT routine from the NAG library
-#                         The default is to use the NAG library routines
-#                         on all other platforms
-#
-#  % gmake 64BITS=y       To compile a 64-bit version on AIX
-#  % gmake 64BITS=n       To compile a 32-bit version on AIX
-#                         The default is 32 bits on Linux clusters
-#
-#  % gmake PGI=y          Use the PGI compiler (pgf90) on Linux. The default
-#                         is to use the Lahey-Fujitsu compiler lf95.
-#
-#  % gmake ALTIX=y        Compiles with Intel compilers on the Altix
-#                         using ifort ... -lmpi
-#
-# You can combine more than one option on the command line:
-#
-#  % gmake OPENMP=y ESSL=y
-#
-# Special targets:
-#
-#  % gmake clean      Removes the executable and all object files (*.o)
-#
-#  % gmake cleanomp   Removes the executable and the object files
-#                     containing OpenMP directives
-#
-#  % gmake doc        Rebuilds the documentation.
-#
-#############################################################################
+
 64BITS=y
 XT3=y
+
+#DFLAG= -g -DDEBUG
+DFLAG= -g -D_NVRAM -D_NVRAM_RESTART -DDELAY 
+
+#CFLAG= -I/home/pradeep/nvmchkpt/include
+#LDFLAG=-L/home/pradeep/nvmchkpt/lib
+CFLAG= -I/ccs/home/anshuman/sudarsun/phoenix/include
+LDFLAG= -L/ccs/home/anshuman/sudarsun/phoenix/lib -lphoenix
+
 
 # Default names of some platform-dependent files
 SETUP:=setup.o
@@ -152,13 +111,19 @@ ifeq ($(os),Linux)
     ##OPT:=-O --ap --tpp --ntrace --staticlink -I/usr/local/lff95/include
   ##  OPT:=-O --ap --pca --trace
  # YX add the following netcdf lib
-    NETCDF := -lnetcdf -lnetcdff
-    LIB := -I/usr/pgi/linux86-64/6.1/include -L/usr/lib \
-               -I/usr/include $(NETCDF)
+    NETCDF := -lnetcdf #-lnetcdff
+    LIB := $(DFLAG) -I/sw/sith/openmpi/1.8.3/rhel6.6_gcc4.8.2/include \
+           -I/usr/include -I/sw/sith/netcdf/3.6.2/rhel6_pgi12.8/include \
+           -L/usr/lib64 -L/usr/include -L/sw/sith/netcdf/3.6.2/rhel6_pgi12.8/lib $(NETCDF) \
+	   $(LDFLAG)	
+    OPT:=-O -D__PGF90 -Mfree -Kieee  -Mpreprocess	
+    #NETCDF := -lnetcdf -lnetcdff
+    #LIB := $(DFLAG)  -L/usr/lib \
+               -I/usr/include $(NETCDF) $(LDFLAG) #-cpp
   ifeq ($(PGI),y)
     MPIMODULE:=/usr/pppl/pgi/5.2-1/mpich-1.2.6/include/f90base
     F90C:=pgf90
-    OPT:=-O -D__PGF90 -Mfree -Kieee
+    OPT:=-O -D__PGF90 -Mfree -Kieee  -Mpreprocess
  #   LIB:=
   endif
  ### ifeq ($(XT3),y)
@@ -251,14 +216,16 @@ endif
 .SUFFIXES: .o .f90 .F90
 
 # List of all the object files needed to build the code
-OBJ:=module.o main.o function.o $(SETUP) ran_num_gen.o set_random_values.o \
+OBJ:=allocate.o module.o main.o function.o $(SETUP) ran_num_gen.o set_random_values.o \
     load.o restart.o diagnosis.o snapshot.o $(CHARGEI) $(POISSON) smooth.o \
     field.o $(PUSHI) $(SHIFTI) $(FFT) tracking.o \
-    dataout3d.o 
+    dataout3d.o
 ## mem_check.o \
 ##    output3d_serial.o output.o
 
 # selectmode.o volume.o 
+
+CC=mpicc
 
 $(CMD): $(OBJ)
 	$(CMP) $(OMPOPT) $(OPT) -o $(CMD) $(OBJ) $(LIB) 
@@ -298,12 +265,24 @@ PHI_dat_to_ncd: PHI_dat_to_ncd.f90
 clean:
 	rm -f $(CMD) $(OBJ) *.mod
 
+	rm -f gtc.input
+
 restartclean:
-	rm -f NCD*
-	rm -f PHI*
-	rm -f DATA_RESTART*
 	rm -f history.out
 	rm -f history_restart.out
 	rm -f sheareb.out
 	rm -f sheareb_restart.out
+	rm -f DATA_RESTART*
+	rm -f snap*.out
+	rm -f PHI*.ncd
+	rm -f NCD*
+	rm -f histry*.bak
+	rm -f RUNdimen.ncdrm 
+	rm -f nvm.lck*
+	rm -f /tmp/mmap.file.*
+	rm -f stats/tot*
+	rm -f stats/nvram*
 
+logclean:
+	rm -f stats/tot*
+	
