@@ -8,7 +8,7 @@ DFLAG= -g -D_NVRAM -D_NVRAM_RESTART -DDELAY
 #CFLAG= -I/home/pradeep/nvmchkpt/include
 #LDFLAG=-L/home/pradeep/nvmchkpt/lib
 CFLAG= -I/net/hu21/pfernand/phoenix/include
-LDFLAG= -L/net/hu21/pfernand/phoenix/lib -lphoenix 
+LDFLAG= -L/net/hu21/pfernand/phoenix/lib -lphoenix  -larmci
 
 
 # Default names of some platform-dependent files
@@ -280,3 +280,6 @@ restartclean:
 logclean:
 	rm -f stats/tot*
 	
+remount:
+	sudo umount /mnt/ssd
+	sudo mount /dev/sdb1 /mnt/ssd
