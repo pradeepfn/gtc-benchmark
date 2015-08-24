@@ -105,8 +105,8 @@ endif
 !_NVRAM
 
   flush(222)
-  ret = fsync(fnum(222))
-  if (ret /= 0) stop "Error calling FSYNC"
+!  ret = fsync(fnum(222))
+!  if (ret /= 0) stop "Error calling FSYNC"
   close(222)
 
 #ifdef DEBUG

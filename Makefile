@@ -7,8 +7,8 @@ DFLAG= -g -D_NVRAM -D_NVRAM_RESTART -DDELAY
 
 #CFLAG= -I/home/pradeep/nvmchkpt/include
 #LDFLAG=-L/home/pradeep/nvmchkpt/lib
-CFLAG= -I/net/hu21/pfernand/phoenix/include
-LDFLAG= -L/net/hu21/pfernand/phoenix/lib -lphoenix  -larmci
+CFLAG= -I/home1/03528/pradeepf/phoenix/include -I/home1/03528/pradeepf/armci_install/include -I${TACC_NETCDF_INC}
+LDFLAG= -L/home1/03528/pradeepf/phoenix/lib -L/home1/03528/pradeepf/armci_install/lib -L${TACC_NETCDF_LIB} -lphoenix  -larmci
 
 
 # Default names of some platform-dependent files
@@ -113,7 +113,7 @@ ifeq ($(os),Linux)
  # YX add the following netcdf lib
     NETCDF := -lnetcdf -lnetcdff
     LIB := $(DFLAG) -cpp -L/usr/lib \
-               -I/usr/include $(NETCDF) $(LDFLAG)
+               -I/usr/include $(NETCDF) $(CFLAG) 
   ifeq ($(PGI),y)
     MPIMODULE:=/usr/pppl/pgi/5.2-1/mpich-1.2.6/include/f90base
     F90C:=pgf90
@@ -219,10 +219,10 @@ OBJ:=allocate.o module.o main.o function.o $(SETUP) ran_num_gen.o set_random_val
 
 # selectmode.o volume.o 
 
-CC=mpicc
+CC=mpif90
 
 $(CMD): $(OBJ)
-	$(CMP) $(OMPOPT) $(OPT) -o $(CMD) $(OBJ) $(LIB) 
+	$(CMP) $(OMPOPT) $(OPT) -o $(CMD) $(OBJ) $(LDFLAG) $(LIB) 
 
 module.o : module.F90
 	$(CMP) $(OMPOPT) $(OPT) -c module.F90

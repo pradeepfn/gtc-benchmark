@@ -1,5 +1,5 @@
 #the log size(MB) per process. Max value is 2000 MB
-nvm.size = 2000
+nvm.size = 200
 chunk.size = 4096
 copy.strategy = 1 
 debug.enable = 1 
