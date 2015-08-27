@@ -1,0 +1,24 @@
+#!/bin/bash
+#----------------------------------------------------
+# SLURM job script to run GTC on 
+# TACC's Stampede system.
+#----------------------------------------------------
+
+#SBATCH -J gtc_pfn              # Job name
+#SBATCH -o gtc_pfn.%j.out       # Name of stdout output file (%j expands to jobId)
+#SBATCH -p development        # Queue name
+#SBATCH -N 1                  # Total number of nodes requested (16 cores/node)
+#SBATCH -n 16                 # Total number of mpi tasks requested
+#SBATCH -t 00:10:00           # Run time (hh:mm:ss) - 1.5 hours
+
+#SBATCH -A TG-CCR150014      # <-- Allocation name to charge job against
+
+
+make restartclean
+echo  0 >| notify/gtc.notify
+cp gtc.input.orig gtc.input
+cp phoenix.config.run phoenix.config
+
+ibrun ./gtc
+
+

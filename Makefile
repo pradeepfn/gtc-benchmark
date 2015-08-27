@@ -3,7 +3,7 @@
 XT3=y
 
 #DFLAG= -g -DDEBUG
-DFLAG= -g -D_NVRAM -D_NVRAM_RESTART -DDELAY 
+DFLAG= -g -O0 -D_NVRAM -D_NVRAM_RESTART -DDELAY 
 
 #CFLAG= -I/home/pradeep/nvmchkpt/include
 #LDFLAG=-L/home/pradeep/nvmchkpt/lib
@@ -273,7 +273,7 @@ restartclean:
 	rm -f histry*.bak
 	rm -f RUNdimen.ncdrm 
 	rm -f nvm.lck*
-	rm -f /mnt/ramdisk/mmap.file.*
+#	rm -f /mnt/ramdisk/mmap.file.*
 	rm -f stats/tot*
 	rm -f stats/nvram*
 

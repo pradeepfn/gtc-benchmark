@@ -4,8 +4,8 @@ chunk.size = 4096
 copy.strategy = 1 
 debug.enable = 1 
 nvram.wbw = -1
-pfile.location = /mnt/ramdisk
-rmt.chkpt.enable = 1
+pfile.location = /dev/shm
+rmt.chkpt.enable = 0
 rmt.rstart.enable = 0
 rstart = 0
 
