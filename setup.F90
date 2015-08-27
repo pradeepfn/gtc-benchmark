@@ -54,7 +54,12 @@ end module particle_decomp
 ! total # of PE and rank of PE
   call mpi_comm_size(mpi_comm_world,numberpe,ierror)
   call mpi_comm_rank(mpi_comm_world,mype,ierror)
+
+#ifdef PHOENIX
   call init(mype,numberpe);
+#endif
+!PHOENIX
+
 ! Read the input file that contains the run parameters
   call read_input_params(micell,mecell,r0,b0,temperature,edensity0)
  
@@ -103,7 +108,7 @@ end module particle_decomp
      tauii=0.532_wp*tauii
   endif
 !zonali, zonale, phip00, pfuxpsi, rdteme, rdtemi, phi, zion, zion0, zelectron, zelectron0, phisave
-#ifdef _NVRAM
+#ifdef PHOENIX
   call start_time(mype)
   varname = "zonali"
   cmtsize = mpsi+1
@@ -135,7 +140,7 @@ end module particle_decomp
      hfluxpsi(0:mpsi),hfluxpse(0:mpsi),zonali(0:mpsi),zonale(0:mpsi),gradt(mpsi),&
      eigenmode(m_poloidal,num_mode,mpsi),STAT=mtest)
 #endif
-!_NVRAM
+!PHOENIX
 
 
 #ifdef DEBUG
@@ -204,7 +209,7 @@ end module particle_decomp
 	if(stdout /= 6 .and. stdout /= 0)close(stdout)
   end if	
   
-#ifdef _NVRAM
+#ifdef PHOENIX
   call resume_time()
   varname = "phi"
   cmtsize = (mzeta+1) * mgrid
@@ -224,7 +229,7 @@ end module particle_decomp
      wtp2(2,mgrid,mzeta),dtemper(mgrid,mzeta),heatflux(mgrid,mzeta),&
      STAT=mtest)
 #endif
-!_NVRAM
+!PHOENIX
   if (mtest /= 0) then
      write(0,*)mype,'*** setup: Cannot allocate pgyro: mtest=',mtest
      call MPI_ABORT(MPI_COMM_WORLD,1,ierror)
@@ -239,7 +244,7 @@ end module particle_decomp
   rden=1.0
 
 ! changing variable init flow to accomodate alloc based restart
-#ifdef _NVRAM_RESTART
+#ifdef PHOENIX
   if(irun == 0)then
    phi=0.0
    phip00=0.0
@@ -258,7 +263,7 @@ end module particle_decomp
   zonali=0.0
   zonale=0.0
 #endif
-!_NVRAM
+!PHOENIX
  
 ! # of marker per grid, Jacobian=(1.0+r*cos(theta+r*sin(theta)))*(1.0+r*cos(theta))
   pmarki=0.0
@@ -307,7 +312,7 @@ end module particle_decomp
      nparam=6
   endif
 
-#ifdef _NVRAM
+#ifdef PHOENIX
    call resume_time()
    varname = "zion"
    cmtsize = nparam * mimax
@@ -327,13 +332,13 @@ allocate(jtion0(4,mimax),&
      jtion1(4,mimax),kzion(mimax),wzion(mimax),wpion(4,mimax),&
      wtion0(4,mimax),wtion1(4,mimax),STAT=mtest)
 #endif
-!_NVRAM
+!PHOENIX
   if (mtest /= 0) then
      write(0,*)mype,'*** Cannot allocate zion: mtest=',mtest
      call MPI_ABORT(MPI_COMM_WORLD,1,ierror)
   endif
   if(nhybrid>0)then
-#ifdef _NVRAM
+#ifdef PHOENIX
      call resume_time()
      cmtsize = 6*memax
      varname = "zelectron"
@@ -360,7 +365,7 @@ allocate(jtion0(4,mimax),&
         markere(mzeta,mgrid),densitye(0:mzeta,mgrid),zelectron1(6,memax),&
         phisave(0:mzeta,mgrid,2*nhybrid),phit(0:mzeta,mgrid),STAT=mtest)
 #endif
-!_NVRAM
+!PHOENIX
      if(mtest /= 0) then
         write(0,*)mype,'*** Cannot allocate zelectron: mtest=',mtest
         call MPI_ABORT(MPI_COMM_WORLD,1,ierror)

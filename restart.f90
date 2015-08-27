@@ -90,7 +90,7 @@ endif
      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
      open(222,file=cdum,status='replace',form='unformatted')
   endif
-#ifdef _NVRAM_RESTART
+#ifdef PHOENIX
 ! record particle information for future restart run
   write(222)istep+mstepall,mi,me,ntracer
   if(mype==0)write(222)etracer,ptracer
@@ -102,7 +102,7 @@ endif
   write(222)zion(1:nparam,1:mi),zion0(6,1:mi)
   if(nhybrid>0)write(222)phisave,zelectron(1:6,1:me),zelectron0(6,1:me)
 #endif
-!_NVRAM
+!PHOENIX
 
   flush(222)
 !  ret = fsync(fnum(222))
@@ -191,7 +191,7 @@ subroutine restart_read
   open(333,file=cdum,status='old',form='unformatted')
 
 ! read particle information to restart previous run
-#ifdef _NVRAM_RESTART
+#ifdef PHOENIX
   read(333)restart_step,mi,me,ntracer
   if(mype==0)read(333)etracer,ptracer
 #else
@@ -200,6 +200,7 @@ subroutine restart_read
   read(333)zion(1:nparam,1:mi),zion0(6,1:mi)
   if(nhybrid>0)read(333)phisave,zelectron(1:6,1:me),zelectron0(6,1:me)
 #endif
+!PHOENIX
   close(333)
 
 #ifdef DEBUG

@@ -3,7 +3,8 @@
 XT3=y
 
 #DFLAG= -g -DDEBUG
-DFLAG= -g -O0 -D_NVRAM -D_NVRAM_RESTART -DDELAY 
+#DFLAG= -g -O0 -DPHOENIX -DDELAY 
+DFLAG= -g -O0 -DDELAY 
 
 #CFLAG= -I/home/pradeep/nvmchkpt/include
 #LDFLAG=-L/home/pradeep/nvmchkpt/lib
@@ -259,7 +260,6 @@ PHI_dat_to_ncd: PHI_dat_to_ncd.f90
 clean:
 	rm -f $(CMD) $(OBJ) *.mod
 
-	rm -f gtc.input
 
 restartclean:
 	rm -f history.out
