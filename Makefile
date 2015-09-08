@@ -3,8 +3,8 @@
 XT3=y
 
 #DFLAG= -g -DDEBUG
-#DFLAG= -g -O0 -DPHOENIX -DDELAY 
-DFLAG= -g -O0 -DDELAY 
+DFLAG= -g -O0 -DPHOENIX -DDELAY 
+#DFLAG= -g -O0 -DDELAY 
 
 #CFLAG= -I/home/pradeep/nvmchkpt/include
 #LDFLAG=-L/home/pradeep/nvmchkpt/lib
