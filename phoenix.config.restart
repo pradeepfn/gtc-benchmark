@@ -1,11 +1,11 @@
 #the log size(MB) per process. Max value is 2000 MB
 nvm.size = 250
 chunk.size = 4096
-copy.strategy = 3 
+copy.strategy = 1 
 debug.enable = 1 
 # 64Mb/s -> 19
 nvram.wbw = -1
-pfile.location = /mnt/ramdisk
+pfile.location = /dev/shm/ramdisk
 rmt.chkpt.enable = 0
 rmt.rstart.enable = 0
 rstart = 1

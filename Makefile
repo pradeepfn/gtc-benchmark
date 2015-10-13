@@ -273,9 +273,9 @@ restartclean:
 	rm -f histry*.bak
 	rm -f RUNdimen.ncdrm 
 	rm -f nvm.lck*
-#	rm -f /mnt/ramdisk/mmap.file.*
 	rm -f stats/tot*
 	rm -f stats/nvram*
+	rm -f stats/*
 
 logclean:
 	rm -f stats/tot*

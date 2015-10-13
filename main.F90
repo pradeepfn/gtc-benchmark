@@ -63,7 +63,7 @@ program gtc
 
 ! initialize particle position and velocity
   CALL LOAD
-  call make_timestamp()
+  !call make_timestamp()
 ! Write out initial position of tracked particles
 !!!  if(track_particles==1)then
 !!!     call locate_tracked_particles
