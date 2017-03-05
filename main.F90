@@ -44,6 +44,9 @@ program gtc
 ! MPI initialize
   call mpi_init(ierror)
 
+
+  call ftimer_declare(1,2,3,4)
+
   tr0=0.0
   tr0wc=0.0
   tracktcpu=0.0
@@ -63,7 +66,6 @@ program gtc
 
 ! initialize particle position and velocity
   CALL LOAD
-  call make_timestamp()
 ! Write out initial position of tracked particles
 !!!  if(track_particles==1)then
 !!!     call locate_tracked_particles
@@ -79,7 +81,7 @@ program gtc
 ! main time loop
   do istep=1,mstep
      do irk=1,2
-
+        call ftimer_start(1)
 ! idiag=0: do time history diagnosis
         idiag=mod(irk+1,2)+mod(istep,ndiag)
 
@@ -88,45 +90,53 @@ program gtc
         call timer(t0,dt,t0wc,dtwc)
         time(5)=time(5)+dt
         timewc(5)=timewc(5)+dtwc
+!         CALL app_snapshot()
 
 ! field
         CALL FIELD
         call timer(t0,dt,t0wc,dtwc)
         time(6)=time(6)+dt
         timewc(6)=timewc(6)+dtwc
+!        CALL app_snapshot()
 
 ! push ion
         CALL PUSHI
         call timer(t0,dt,t0wc,dtwc)
         time(1)=time(1)+dt
         timewc(1)=timewc(1)+dtwc
+ !       CALL app_snapshot()
         
 ! redistribute ion across PEs
         CALL SHIFTI
         call timer(t0,dt,t0wc,dtwc)
         time(2)=time(2)+dt
         timewc(2)=timewc(2)+dtwc
+  !      CALL app_snapshot() generate some data
 
 ! ion perturbed density
         CALL CHARGEI
         call timer(t0,dt,t0wc,dtwc)
         time(3)=time(3)+dt
         timewc(3)=timewc(3)+dtwc
+!        CALL app_snapshot()
 
 ! smooth ion density
         CALL SMOOTH(0)
         call timer(t0,dt,t0wc,dtwc)
         time(5)=time(5)+dt
         timewc(5)=timewc(5)+dtwc
+ !       CALL app_snapshot()
 
 ! solve GK Poisson equation using adiabatic electron
         CALL POISSON(0)
         call timer(t0,dt,t0wc,dtwc)
         time(4)=time(4)+dt
         timewc(4)=timewc(4)+dtwc
+!        CALL app_snapshot()
 
      	if(idiag==0)then
            CALL DIAGNOSIS
+           !CALL app_snapshot()
            !call DATAOUT3D
         !!!  CALL VOLUME    !Original netCDF 3D potential data
         !  CALL OUTPUT3D  !HDF5 parallel output of 3D potential data
@@ -141,12 +151,15 @@ program gtc
      tracktcpu=tracktcpu+dt
      tracktwc=tracktwc+dtwc
 
+        CALL SNAPSHOT
 ! profile snapshots, write particle information to restart file
      if(mod(istep,mstep/msnap) .eq. 0)then
-        CALL SNAPSHOT
+       ! CALL SNAPSHOT
         if(track_particles==1 .and. nptrack>0)call write_tracked_particles
      endif
+     call ftimer_end(1)
   enddo
+  call ftimer_fclose()
 
   call timer(t0,dt,t0wc,dtwc)
   loop_time=t0wc-loop_time
@@ -178,10 +191,6 @@ program gtc
 #ifdef __NERSC
 !  call system_stats()
 #endif
-
-! we take the end timestamp
-call end_timestamp()
-
 
 ! MPI finalize
   call mpi_finalize(ierror)

@@ -55,11 +55,12 @@ end module particle_decomp
   call mpi_comm_size(mpi_comm_world,numberpe,ierror)
   call mpi_comm_rank(mpi_comm_world,mype,ierror)
   call init(mype,numberpe);
+  call ftimer_fopen(mype)
 ! Read the input file that contains the run parameters
   call read_input_params(micell,mecell,r0,b0,temperature,edensity0)
  
 !!we take a time stamp on a file, on first start
-     call start_timestamp(mype)
+!     call start_timestamp(mype)
 
 ! numerical constant
   pi=4.0_wp*atan(1.0_wp)

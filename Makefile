@@ -3,7 +3,8 @@
 XT3=y
 
 #DFLAG= -g -DDEBUG
-DFLAG= -g -D_NVRAM -D_NVRAM_RESTART -DDELAY 
+#DFLAG= -g -D_NVRAM -D_NVRAM_RESTART -DDELAY 
+DFLAG= -g -D_NVRAM -DDELAY 
 
 #CFLAG= -I/home/pradeep/nvmchkpt/include
 #LDFLAG=-L/home/pradeep/nvmchkpt/lib
@@ -213,7 +214,7 @@ endif
 OBJ:=allocate.o module.o main.o function.o $(SETUP) ran_num_gen.o set_random_values.o \
     load.o restart.o diagnosis.o snapshot.o $(CHARGEI) $(POISSON) smooth.o \
     field.o $(PUSHI) $(SHIFTI) $(FFT) tracking.o \
-    dataout3d.o
+    dataout3d.o timer.o
 ## mem_check.o \
 ##    output3d_serial.o output.o
 
@@ -245,6 +246,9 @@ dataout3d.o: dataout3d.f90
 
 .F90.o : module.o
 	$(CMP) $(OMPOPT) $(OPT) $(LIB) -c $<
+
+%.o:    %.c
+	mpicc -g -c $<
 
 ncdpost: ncdpost.f90
 	$(F90C) $(OPT) -o $@ $(LIB) $^

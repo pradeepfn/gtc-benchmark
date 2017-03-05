@@ -30,15 +30,16 @@ subroutine restart_write
      end function fsync
   end interface
 
-  character(len=18) cdum
-  character(len=10) restart_dir
+  character(len=28) cdum
+  character(len=28) ddum
+  character(len=60) restart_dir
   character(len=60) file_name
   real(wp) dum
   integer i,j,mquantity,mflx,n_mode,mstepfinal,noutputs,notify
   integer save_restart_files,ierr,ret
 
-  !save_restart_files=1
-  save_restart_files=0
+  save_restart_files=1
+  !save_restart_files=0
 
 !!!!!!!!!!!!!!!******************
 !!  if(mype < 10)then
@@ -69,10 +70,13 @@ endif
 
   if(mype < 10)then
      write(cdum,'("DATA_RESTART.0000",i1)')mype
+     write(ddum,'("0000",i1)')mype
   elseif(mype < 100)then
      write(cdum,'("DATA_RESTART.000",i2)')mype
+     write(ddum,'("0000",i2)')mype
   elseif(mype < 1000)then
      write(cdum,'("DATA_RESTART.00",i3)')mype
+     write(ddum,'("0000",i3)')mype
   elseif(mype < 10000)then
      write(cdum,'("DATA_RESTART.0",i4)')mype
   else
@@ -81,8 +85,10 @@ endif
 
 
   if(save_restart_files==1)then
-     write(restart_dir,'("STEP_",i0)')(mstepall+istep)
-     if(mype==0)call system("mkdir "//restart_dir)
+     write(restart_dir,'("/mnt/ramfs/STEP_",i0)')(mstepall+istep)
+     restart_dir=trim(restart_dir)//'_'//trim(ddum)
+     !if(mype==0)call system("mkdir "//restart_dir)
+     call system("mkdir "//restart_dir)
      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
      file_name=trim(restart_dir)//'/'//trim(cdum)
      open(222,file=file_name,status='replace',form='unformatted')
@@ -95,7 +101,7 @@ endif
   write(222)istep+mstepall,mi,me,ntracer
   if(mype==0)write(222)etracer,ptracer
 
-  call chkpt_all(mype);
+  call app_snapshot();
 #else
   write(222)istep+mstepall,mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale
   if(mype==0)write(222)etracer,ptracer
@@ -104,9 +110,9 @@ endif
 #endif
 !_NVRAM
 
-  flush(222)
-  ret = fsync(fnum(222))
-  if (ret /= 0) stop "Error calling FSYNC"
+  !flush(222)
+  !ret = fsync(fnum(222))
+  !if (ret /= 0) stop "Error calling FSYNC"
   close(222)
 
 #ifdef DEBUG
