@@ -3,13 +3,13 @@
 XT3=y
 
 #DFLAG= -g -DDEBUG
-#DFLAG= -g -D_NVRAM -D_NVRAM_RESTART -DDELAY 
-DFLAG= -g -D_NVRAM -DDELAY 
+DFLAG= -g -D_NVRAM -D_NVRAM_RESTART -DDELAY 
+#DFLAG= -g -D_NVRAM -DDELAY 
 
 #CFLAG= -I/home/pradeep/nvmchkpt/include
 #LDFLAG=-L/home/pradeep/nvmchkpt/lib
-CFLAG= -I/net/hu21/pfernand/phoenix/include
-LDFLAG= -L/net/hu21/pfernand/phoenix/lib -lphoenix  -larmci
+CFLAG= -I/net/hu21/pfernand/checkout/phoenix/include
+LDFLAG=-I/usr/local/netcdf/fortran/include -L/usr/local/netcdf/fortran/lib -L/usr/local/netcdf/c/lib -L/net/hu21/pfernand/checkout/phoenix/lib -lphoenix  -larmci
 
 
 # Default names of some platform-dependent files
@@ -214,7 +214,7 @@ endif
 OBJ:=allocate.o module.o main.o function.o $(SETUP) ran_num_gen.o set_random_values.o \
     load.o restart.o diagnosis.o snapshot.o $(CHARGEI) $(POISSON) smooth.o \
     field.o $(PUSHI) $(SHIFTI) $(FFT) tracking.o \
-    dataout3d.o timer.o
+    dataout3d.o timer.o wrapper.o
 ## mem_check.o \
 ##    output3d_serial.o output.o
 
@@ -248,7 +248,7 @@ dataout3d.o: dataout3d.f90
 	$(CMP) $(OMPOPT) $(OPT) $(LIB) -c $<
 
 %.o:    %.c
-	mpicc -g -c $<
+	mpicc -g $(CFLAG) -c $<
 
 ncdpost: ncdpost.f90
 	$(F90C) $(OPT) -o $@ $(LIB) $^

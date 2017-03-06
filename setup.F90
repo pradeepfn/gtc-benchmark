@@ -54,7 +54,7 @@ end module particle_decomp
 ! total # of PE and rank of PE
   call mpi_comm_size(mpi_comm_world,numberpe,ierror)
   call mpi_comm_rank(mpi_comm_world,mype,ierror)
-  call init(mype,numberpe);
+  call px_init(mype,numberpe);
   call ftimer_fopen(mype)
 ! Read the input file that contains the run parameters
   call read_input_params(micell,mecell,r0,b0,temperature,edensity0)
@@ -105,7 +105,6 @@ end module particle_decomp
   endif
 !zonali, zonale, phip00, pfuxpsi, rdteme, rdtemi, phi, zion, zion0, zelectron, zelectron0, phisave
 #ifdef _NVRAM
-  call start_time(mype)
   varname = "zonali"
   cmtsize = mpsi+1
   call alloc_1d_real(zonali,mpsi+1,varname, mype, cmtsize)
@@ -119,7 +118,6 @@ end module particle_decomp
   call alloc_1d_real(rdteme,mpsi+1,varname, mype, cmtsize)
   varname = "rdtemi"
   call alloc_1d_real(rdtemi,mpsi+1,varname, mype, cmtsize)
-  call pause_time()
 
   allocate (qtinv(0:mpsi),itran(0:mpsi),mtheta(0:mpsi),&
      deltat(0:mpsi),rtemi(0:mpsi),rteme(0:mpsi),&
@@ -206,11 +204,9 @@ end module particle_decomp
   end if	
   
 #ifdef _NVRAM
-  call resume_time()
   varname = "phi"
   cmtsize = (mzeta+1) * mgrid
   call alloc_2d_real(phi,mzeta+1,mgrid,varname, mype, cmtsize)
-  call pause_time()
 
   allocate(pgyro(4,mgrid),tgyro(4,mgrid),markeri(mzeta,mgrid),&
      densityi(0:mzeta,mgrid),evector(3,0:mzeta,mgrid),&
@@ -309,14 +305,12 @@ end module particle_decomp
   endif
 
 #ifdef _NVRAM
-   call resume_time()
    varname = "zion"
    cmtsize = nparam * mimax
    call alloc_2d_real(zion,nparam,mimax,varname, mype, cmtsize)
    varname = "zion0"
    cmtsize = nparam*mimax 
    call alloc_2d_real(zion0,nparam,mimax,varname, mype, cmtsize)
-   call pause_time()
 
 allocate(jtion0(4,mimax),&
      jtion1(4,mimax),kzion(mimax),wzion(mimax),wpion(4,mimax),&
@@ -335,7 +329,6 @@ allocate(jtion0(4,mimax),&
   endif
   if(nhybrid>0)then
 #ifdef _NVRAM
-     call resume_time()
      cmtsize = 6*memax
      varname = "zelectron"
      call alloc_2d_real(zelectron,6,memax,varname, mype, cmtsize)
@@ -347,7 +340,6 @@ allocate(jtion0(4,mimax),&
      varname = "phisave"
      cmtsize = (mzeta+1) * mgrid * 2*nhybrid
      call alloc_3d_real(phisave,mzeta+1,mgrid,2*nhybrid,varname,mype,cmtsize)
-     call end_time()
      
      allocate(jtelectron0(memax),&
         jtelectron1(memax),kzelectron(memax),wzelectron(memax),&

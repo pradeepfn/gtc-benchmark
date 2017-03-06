@@ -91,6 +91,6 @@ contains
 
     subroutine free_1d_real(arr)
         real, pointer :: arr(:)
-        call afree(arr)
+        call px_free(arr)
     end subroutine
 end module

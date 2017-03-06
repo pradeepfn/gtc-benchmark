@@ -38,8 +38,8 @@ subroutine restart_write
   integer i,j,mquantity,mflx,n_mode,mstepfinal,noutputs,notify
   integer save_restart_files,ierr,ret
 
-  save_restart_files=1
-  !save_restart_files=0
+  !save_restart_files=1
+  save_restart_files=0
 
 !!!!!!!!!!!!!!!******************
 !!  if(mype < 10)then
@@ -53,7 +53,6 @@ subroutine restart_write
 
 
 if(irun == 1)then
-    call end_timestamp()
 endif
 
 ! inserted a termination hook
@@ -101,7 +100,7 @@ endif
   write(222)istep+mstepall,mi,me,ntracer
   if(mype==0)write(222)etracer,ptracer
 
-  call app_snapshot();
+  call px_snapshot();
 #else
   write(222)istep+mstepall,mi,me,ntracer,rdtemi,rdteme,pfluxpsi,phi,phip00,zonali,zonale
   if(mype==0)write(222)etracer,ptracer
