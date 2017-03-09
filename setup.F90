@@ -54,7 +54,7 @@ end module particle_decomp
 ! total # of PE and rank of PE
   call mpi_comm_size(mpi_comm_world,numberpe,ierror)
   call mpi_comm_rank(mpi_comm_world,mype,ierror)
-  call px_init(mype,numberpe);
+  call px_init(mype);
   call ftimer_fopen(mype)
 ! Read the input file that contains the run parameters
   call read_input_params(micell,mecell,r0,b0,temperature,edensity0)
