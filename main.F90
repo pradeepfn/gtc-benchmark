@@ -191,7 +191,7 @@ program gtc
 #ifdef __NERSC
 !  call system_stats()
 #endif
-
+  call px_finalize()
 ! MPI finalize
   call mpi_finalize(ierror)
 
