@@ -1,6 +1,6 @@
 &input_parameters
   irun=0,
-  mstep=150,
+  mstep=10,
   msnap=10,
   ndiag=1,
   nonlinear=1.0,
@@ -10,7 +10,7 @@
   tstep=0.1,
   micell=2,
   mecell=2,
-  mpsi=40, 
+  mpsi=100, 
   mthetamax=640,
   mzetamax=64,
   npartdom=1,

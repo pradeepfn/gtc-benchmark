@@ -151,10 +151,10 @@ program gtc
      tracktcpu=tracktcpu+dt
      tracktwc=tracktwc+dtwc
 
-        CALL SNAPSHOT
+        !CALL SNAPSHOT
 ! profile snapshots, write particle information to restart file
      if(mod(istep,mstep/msnap) .eq. 0)then
-       ! CALL SNAPSHOT
+        CALL SNAPSHOT
         if(track_particles==1 .and. nptrack>0)call write_tracked_particles
      endif
      call ftimer_end(1)

@@ -9,7 +9,7 @@ DFLAG= -g -D_NVRAM -D_NVRAM_RESTART -DDELAY
 #CFLAG= -I/home/pradeep/nvmchkpt/include
 #LDFLAG=-L/home/pradeep/nvmchkpt/lib
 CFLAG= -I/net/hu21/pfernand/checkout/phoenix/include
-LDFLAG=-I/usr/local/netcdf/fortran/include -L/usr/local/netcdf/fortran/lib -L/usr/local/netcdf/c/lib -L/net/hu21/pfernand/checkout/phoenix/lib -lphoenix  -larmci
+LDFLAG=-I/usr/local/netcdf/fortran/include -L/usr/local/netcdf/fortran/lib -L/usr/local/netcdf/c/lib -L/net/hu21/pfernand/checkout/phoenix/lib -lphoenix -lstdc++  -larmci
 
 
 # Default names of some platform-dependent files

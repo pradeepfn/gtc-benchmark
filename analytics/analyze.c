@@ -23,6 +23,7 @@ int main(int argc, char **argv)
 	printf("mpiconsumer: retrieving snapshot: %ld\n", vsnapshot);
     px_get_snapshot(vsnapshot++);	
     // compute
+    printf("data processing\n");
     sleep(5);
     }
     px_finalize();
